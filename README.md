@@ -51,7 +51,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - [x] Basic tests for balance logic
 
 ### Upcoming ⏳
-- [ ] Server read functions (users, expenses+participants, payments)
+- [x] Server read functions (users, expenses+participants, payments)
 - [ ] Dashboard balances page
 - [ ] Server Actions: createExpense, createPayment, markSettled
 - [ ] UI forms
