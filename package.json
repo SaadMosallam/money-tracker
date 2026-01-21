@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "test:calc": "tsx scripts/tests/calculateBalances.ts"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

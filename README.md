@@ -45,10 +45,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - [x] Row validators created
 
 ### Next 🔜 (Domain Logic)
-- [ ] Aggregate dataset validation for balances
-- [ ] Weighted split helper (integer-safe cents)
-- [ ] Pure calculateBalances() function
-- [ ] Basic tests for balance logic
+- [x] Aggregate dataset validation for balances
+- [x] Weighted split helper (integer-safe cents)
+- [x] Pure calculateBalances() function
+- [x] Basic tests for balance logic
 
 ### Upcoming ⏳
 - [ ] Server read functions (users, expenses+participants, payments)
