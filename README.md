@@ -34,3 +34,29 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Progress
+
+### Done ✅
+- [x] Neon + Vercel integration
+- [x] Drizzle schema + migrations applied
+- [x] Seed users script works
+- [x] Seeded users inserted
+- [x] Row validators created
+
+### Next 🔜 (Domain Logic)
+- [ ] Aggregate dataset validation for balances
+- [ ] Weighted split helper (integer-safe cents)
+- [ ] Pure calculateBalances() function
+- [ ] Basic tests for balance logic
+
+### Upcoming ⏳
+- [ ] Server read functions (users, expenses+participants, payments)
+- [ ] Dashboard balances page
+- [ ] Server Actions: createExpense, createPayment, markSettled
+- [ ] UI forms
+
+### Later 🌱
+- [ ] Auth wiring & route protection
+- [ ] UX polish & activity feed
+
