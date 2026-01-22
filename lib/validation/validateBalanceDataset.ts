@@ -34,9 +34,7 @@ import type {
     }
   
     // Validate each unsettled expense
-    for (const expense of expenses) {
-      if (expense.isSettled) continue;
-  
+    for (const expense of expenses) {  
       const list = participantsByExpense.get(expense.id);
       if (!list || list.length === 0) {
         throw new Error(

@@ -35,9 +35,7 @@ export function calculateBalances(input: CalculateBalancesInput) {
   };
 
   // Step 4: apply unsettled expenses
-  for (const expense of expenses) {
-    if (expense.isSettled) continue;
-  
+  for (const expense of expenses) {  
     const expenseParticipants = participants.filter(
       (p) => p.expenseId === expense.id
     );
