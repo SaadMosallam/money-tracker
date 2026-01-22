@@ -4,7 +4,7 @@ export const revalidate = 0;
 
 const page = async () => {
     const balances = await getBalances();
-
+  
     return (
     <div>
         <h1>Balances</h1>
