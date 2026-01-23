@@ -38,6 +38,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Progress
 
 ### Done ✅
+
 - [x] Neon + Vercel integration
 - [x] Drizzle schema + migrations applied
 - [x] Seed users script works
@@ -45,18 +46,20 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - [x] Row validators created
 
 ### Next 🔜 (Domain Logic)
+
 - [x] Aggregate dataset validation for balances
 - [x] Weighted split helper (integer-safe cents)
 - [x] Pure calculateBalances() function
 - [x] Basic tests for balance logic
 
 ### Upcoming ⏳
+
 - [x] Server read functions (users, expenses+participants, payments)
-- [ ] Dashboard balances page
-- [ ] Server Actions: createExpense, createPayment, markSettled
+- [x] Dashboard balances page
+- [x] Server Actions: createExpense, createPayment, markSettled
 - [ ] UI forms
 
 ### Later 🌱
+
 - [ ] Auth wiring & route protection
 - [ ] UX polish & activity feed
-

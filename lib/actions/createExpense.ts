@@ -64,6 +64,6 @@ export async function createExpense(formData: FormData) {
   });
 
   // ---------- 5️⃣ Revalidate dashboard ----------
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   revalidatePath("/expenses");
 }

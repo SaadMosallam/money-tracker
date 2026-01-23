@@ -41,6 +41,6 @@ export async function createPayment(formData: FormData): Promise<void> {
   await db.insert(payments).values(paymentRow);
 
   // ---------- 4️⃣ Revalidate ----------
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   revalidatePath("/payments");
 }

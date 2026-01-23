@@ -75,7 +75,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
       try {
         await action(formData);
         toast.success("Expense added successfully.");
-        router.push("/dashboard");
+        router.push("/");
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong. Please try again.");
