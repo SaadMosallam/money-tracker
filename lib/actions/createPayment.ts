@@ -29,6 +29,7 @@ export async function createPayment(formData: FormData): Promise<void> {
     fromUserId,
     toUserId,
     amount,
+    createdAt: new Date(),
   };
 
   // ---------- 2️⃣ Row-level validation ----------
@@ -41,4 +42,5 @@ export async function createPayment(formData: FormData): Promise<void> {
 
   // ---------- 4️⃣ Revalidate ----------
   revalidatePath("/dashboard");
+  revalidatePath("/payments");
 }
