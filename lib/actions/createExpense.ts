@@ -37,6 +37,7 @@ export async function createExpense(formData: FormData) {
     amount,
     paidById,
     isSettled: false,
+    createdAt: new Date(),
   };
 
   const participantRows = participants.map((p) => ({
@@ -64,4 +65,5 @@ export async function createExpense(formData: FormData) {
 
   // ---------- 5️⃣ Revalidate dashboard ----------
   revalidatePath("/dashboard");
+  revalidatePath("/expenses");
 }
