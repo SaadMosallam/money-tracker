@@ -3,8 +3,8 @@ import { db } from "@/lib/db/index";
 import { expenseParticipants, expenses, payments, users } from "@/lib/db/schema";
 
 export const getUserIds = async () => {
-  const userIds = await db.select().from(users);
-  return userIds.map((user) => user.id);
+  const usersRows = await db.select().from(users);
+  return usersRows.map((user) => user.id);
 };
 
 export const getExpenses = async () => {
