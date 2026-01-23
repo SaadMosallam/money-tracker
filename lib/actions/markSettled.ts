@@ -18,4 +18,5 @@ export async function markSettled(formData: FormData): Promise<void> {
     .where(eq(expenses.id, expenseId));
 
   revalidatePath("/dashboard");
+  revalidatePath("/expenses");
 }

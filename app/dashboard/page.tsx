@@ -3,14 +3,12 @@ import { getUsers } from "@/lib/db/queries/users";
 
 import { PageContainer } from "@/lib/ui/components/layout/PageContainer";
 import { BalanceTable, PairwiseDebts } from "@/lib/ui/components/balance";
+import { buildUserNameById } from "@/lib/ui/utils/userNameById";
 
 export default async function DashboardPage() {
   const [balances, users] = await Promise.all([getBalances(), getUsers()]);
 
-  const userNameById = users.reduce<Record<string, string>>((acc, user) => {
-    acc[user.id] = user.name;
-    return acc;
-  }, {});
+  const userNameById = buildUserNameById(users);
 
   const balanceRows = Object.entries(balances).map(([userId, balance]) => ({
     userId,
