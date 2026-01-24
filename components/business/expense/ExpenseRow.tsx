@@ -2,8 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { markSettled } from "@/lib/actions/markSettled";
-import { Money } from "@/lib/ui/components/primitives/Money";
-import { UserLabel } from "@/lib/ui/components/primitives/UserLabel";
+import { Money } from "@/components/business/primitives/Money";
+import { UserLabel } from "@/components/business/primitives/UserLabel";
 
 type ExpenseRowProps = {
   id: string;

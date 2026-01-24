@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Money } from "@/lib/ui/components/primitives/Money";
-import { UserLabel } from "@/lib/ui/components/primitives/UserLabel";
+import { Money } from "@/components/business/primitives/Money";
+import { UserLabel } from "@/components/business/primitives/UserLabel";
 
 type BalanceRow = {
   userId: string;

@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PaymentRow } from "@/lib/ui/components/payment/PaymentRow";
+import { PaymentRow } from "@/components/business/payment/PaymentRow";
 
 type PaymentRowData = {
   id: string;

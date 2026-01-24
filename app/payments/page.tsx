@@ -1,7 +1,7 @@
 import { getPayments } from "@/lib/db/queries/balances";
 import { getUsers } from "@/lib/db/queries/users";
-import { PageContainer } from "@/lib/ui/components/layout/PageContainer";
-import { PaymentList } from "@/lib/ui/components/payment/PaymentForm";
+import { PageContainer } from "@/components/business/layout/PageContainer";
+import { PaymentList } from "@/components/business/payment/PaymentForm";
 import { buildUserNameById } from "@/lib/ui/utils/userNameById";
 
 export default async function PaymentsPage() {

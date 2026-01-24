@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ArrowRightLeft,
   LayoutDashboard,
   ListOrdered,
   PlusCircle,
   Receipt,
-  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

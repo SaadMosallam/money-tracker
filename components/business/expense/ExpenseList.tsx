@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExpenseRow } from "@/lib/ui/components/expense/ExpenseRow";
+import { ExpenseRow } from "@/components/business/expense/ExpenseRow";
 
 type ExpenseRowData = {
   id: string;

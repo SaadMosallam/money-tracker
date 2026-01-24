@@ -1,7 +1,7 @@
 import { getExpenses, getExpenseParticipants } from "@/lib/db/queries/balances";
 import { getUsers } from "@/lib/db/queries/users";
-import { ExpenseList } from "@/lib/ui/components/expense/ExpenseList";
-import { PageContainer } from "@/lib/ui/components/layout/PageContainer";
+import { ExpenseList } from "@/components/business/expense/ExpenseList";
+import { PageContainer } from "@/components/business/layout/PageContainer";
 import { buildUserNameById } from "@/lib/ui/utils/userNameById";
 
 export default async function ExpensesPage() {

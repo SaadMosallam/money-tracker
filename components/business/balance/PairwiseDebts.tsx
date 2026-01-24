@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Money } from "@/lib/ui/components/primitives/Money";
-import { UserLabel } from "@/lib/ui/components/primitives/UserLabel";
+import { Money } from "@/components/business/primitives/Money";
+import { UserLabel } from "@/components/business/primitives/UserLabel";
 import type { BalanceByUserId } from "@/lib/types/expensesTypes";
 
 type PairwiseDebt = {
@@ -93,7 +93,9 @@ export function PairwiseDebts({ balances, userNameById }: PairwiseDebtsProps) {
                 >
                   <TableCell>
                     <UserLabel
-                      name={userNameById[transfer.fromUserId] ?? transfer.fromUserId}
+                      name={
+                        userNameById[transfer.fromUserId] ?? transfer.fromUserId
+                      }
                     />
                   </TableCell>
                   <TableCell>

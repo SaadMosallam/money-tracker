@@ -1,8 +1,8 @@
 import { getBalances } from "@/lib/db/queries/balances";
 import { getUsers } from "@/lib/db/queries/users";
 
-import { PageContainer } from "@/lib/ui/components/layout/PageContainer";
-import { BalanceTable, PairwiseDebts } from "@/lib/ui/components/balance";
+import { PageContainer } from "@/components/business/layout/PageContainer";
+import { BalanceTable, PairwiseDebts } from "@/components/business/balance";
 import { buildUserNameById } from "@/lib/ui/utils/userNameById";
 
 export default async function Home() {
