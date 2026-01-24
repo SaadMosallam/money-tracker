@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils/cn";
 type NavItem = {
   href: string;
   label: string;
+  mobileLabel?: string;
   icon: React.ReactNode;
 };
 
@@ -21,8 +22,18 @@ const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
   { href: "/expenses", label: "Expenses", icon: <Receipt className="h-4 w-4" /> },
   { href: "/payments", label: "Payments", icon: <ArrowRightLeft className="h-4 w-4" /> },
-  { href: "/expenses/new", label: "New Expense", icon: <PlusCircle className="h-4 w-4" /> },
-  { href: "/payments/new", label: "New Payment", icon: <BanknoteArrowUp className="h-4 w-4" /> },
+  {
+    href: "/expenses/new",
+    label: "New Expense",
+    mobileLabel: "Expense",
+    icon: <PlusCircle className="h-4 w-4" />,
+  },
+  {
+    href: "/payments/new",
+    label: "New Payment",
+    mobileLabel: "Payment",
+    icon: <BanknoteArrowUp className="h-4 w-4" />,
+  },
 ];
 
 const isActive = (pathname: string, href: string) => {
@@ -35,9 +46,20 @@ export function AppNav() {
   return (
     <>
       <header className="sticky top-0 z-40 hidden border-b bg-background/95 backdrop-blur md:block">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-          <div className="text-sm font-semibold tracking-tight">Money Tracker</div>
-          <nav className="flex items-center gap-3 text-sm">
+        <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center px-4">
+          {pathname === "/" ? (
+            <span className="text-sm font-semibold tracking-tight text-foreground">
+              Money Tracker
+            </span>
+          ) : (
+            <Link
+              href="/"
+              className="text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
+            >
+              Money Tracker
+            </Link>
+          )}
+          <nav className="flex items-center justify-center gap-3 text-sm">
             {navItems.map((item) => {
               const active = isActive(pathname, item.href);
               return (
@@ -57,6 +79,12 @@ export function AppNav() {
               );
             })}
           </nav>
+          <span
+            className="text-sm font-semibold tracking-tight text-foreground/0 select-none"
+            aria-hidden="true"
+          >
+            Money Tracker
+          </span>
         </div>
       </header>
 
@@ -69,12 +97,14 @@ export function AppNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-2 py-2 text-xs",
+                  "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
                   active ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {item.icon}
-                <span className="truncate">{item.label}</span>
+                <span className="whitespace-normal">
+                  {item.mobileLabel ?? item.label}
+                </span>
               </Link>
             );
           })}

@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AppNav />
-          <div className="min-h-screen pb-20 pt-14 md:pb-0">
+          <div className="min-h-screen pb-20 pt-0 md:pb-0 md:pt-14">
             {children}
           </div>
         </ThemeProvider>
