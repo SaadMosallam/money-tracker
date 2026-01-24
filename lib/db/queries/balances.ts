@@ -1,3 +1,4 @@
+import { desc } from "drizzle-orm";
 import { calculateBalances } from "@/lib/calculations/calculateBalances";
 import { db } from "@/lib/db/index";
 import { expenseParticipants, expenses, payments, users } from "@/lib/db/schema";
@@ -8,7 +9,7 @@ export const getUserIds = async () => {
 };
 
 export const getExpenses = async () => {
-    return db.select().from(expenses);
+  return db.select().from(expenses).orderBy(desc(expenses.createdAt));
 };
 
 export const getExpenseParticipants = async () => {
@@ -16,7 +17,7 @@ export const getExpenseParticipants = async () => {
 };
 
 export const getPayments = async () => {
-    return db.select().from(payments);
+  return db.select().from(payments).orderBy(desc(payments.createdAt));
 };
 
 export const getBalanceDataset = async () => {
