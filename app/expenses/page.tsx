@@ -41,7 +41,11 @@ export default async function ExpensesPage() {
             const name = userNameById[p.userId] ?? p.userId;
             const percent =
               totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
-            return `${name} (${percentFormatter.format(percent)}%)`;
+            const percentLabel =
+              percent > 0 && percent < 0.01
+                ? "<0.01%"
+                : `${percentFormatter.format(percent)}%`;
+            return `${name} (${percentLabel})`;
           })
           .join(", ");
 

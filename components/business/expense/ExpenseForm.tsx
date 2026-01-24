@@ -56,14 +56,10 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
     return initial;
   });
 
-  // this function builds the payload for the participants
-  // it takes the amount in cents and returns an array of objects
-  // each object has a userId and a weight
-  // the weight is the share of the expense for the user
-  // if the amount is not provided, it returns an array with all participants and a weight of 1
-  // if the amount is provided, it returns an array with the participants and the weight of the share
-  // the weight is calculated by dividing the amount by the number of participants
-  // if the amount is not divisible by the number of participants, it distributes the remainder equally among the participants
+  // Build participant weights from exact shares.
+  // - If a user entered a share amount, weight = that exact share (in cents).
+  // - Remaining amount is split equally across users with no share entered.
+  // - If no total amount is provided, all selected users default to weight 1.
   const buildParticipantsPayload = useMemo(() => {
     return (amountCents: number | null) => {
       const selected = Object.entries(participants)
