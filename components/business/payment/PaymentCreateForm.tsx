@@ -20,6 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { parseCurrencyToCents, sanitizeCurrencyInput } from "@/lib/utils/currency";
 
 type UserOption = {
   id: string;
@@ -60,6 +61,11 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
           toast.error("Please select two different users.");
           return;
         }
+        const amountCents = parseCurrencyToCents(amount);
+        if (!amountCents || amountCents <= 0) {
+          toast.error("Please enter a valid amount.");
+          return;
+        }
         await action(formData);
         toast.success("Payment added successfully.");
         router.push("/");
@@ -94,11 +100,7 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <input type="hidden" name="fromUserId" value={fromUserId} />
           <input type="hidden" name="toUserId" value={toUserId} />
-          <input
-            type="hidden"
-            name="amount"
-            value={amount ? String(Number(amount) * 100) : ""}
-          />
+          <input type="hidden" name="amount" value={parseCurrencyToCents(amount) ?? ""} />
 
           <FieldGroup>
             <Field>
@@ -106,11 +108,14 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline">
+                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
                       {fromUserLabel}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
                     <DropdownMenuRadioGroup
                       value={fromUserId}
                       onValueChange={(value) => {
@@ -141,11 +146,14 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline">
+                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
                       {toUserLabel}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
                     <DropdownMenuRadioGroup
                       value={toUserId}
                       onValueChange={(value) => {
@@ -176,26 +184,21 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
               <FieldContent>
                 <Input
                   id="amount"
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="100"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="100.00"
                   value={amount}
                   onChange={(event) => {
-                    const raw = event.target.value;
-                    const sanitized = raw.replace(/[^\d]/g, "");
-                    setAmount(sanitized);
+                    setAmount(sanitizeCurrencyInput(event.target.value));
                   }}
                   required
                 />
               </FieldContent>
-              <FieldDescription>Whole EGP only (no decimals).</FieldDescription>
+              <FieldDescription>Up to 2 decimals (e.g. 125.50).</FieldDescription>
             </Field>
           </FieldGroup>
 
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} className="cursor-pointer">
             {isPending ? "Creating..." : "Create Payment"}
           </Button>
         </form>

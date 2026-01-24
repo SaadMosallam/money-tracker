@@ -4,6 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { markSettled } from "@/lib/actions/markSettled";
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
+import { formatDateTime } from "@/lib/utils/date";
 
 type ExpenseRowProps = {
   id: string;
@@ -44,7 +45,7 @@ export function ExpenseRow({
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        {createdAt ? createdAt.toLocaleDateString() : "—"}
+        {createdAt ? formatDateTime(createdAt) : "—"}
       </TableCell>
       <TableCell className="whitespace-nowrap text-right">
         {isSettled ? (

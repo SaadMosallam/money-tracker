@@ -23,6 +23,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { parseCurrencyToCents, sanitizeCurrencyInput } from "@/lib/utils/currency";
 
 type UserOption = {
   id: string;
@@ -38,7 +39,7 @@ type ParticipantState = Record<
   string,
   {
     selected: boolean;
-    weight: number;
+    share: string;
   }
 >;
 
@@ -50,20 +51,78 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
   const [participants, setParticipants] = useState<ParticipantState>(() => {
     const initial: ParticipantState = {};
     for (const user of users) {
-      initial[user.id] = { selected: true, weight: 1 };
+      initial[user.id] = { selected: true, share: "" };
     }
     return initial;
   });
 
+  // this function builds the payload for the participants
+  // it takes the amount in cents and returns an array of objects
+  // each object has a userId and a weight
+  // the weight is the share of the expense for the user
+  // if the amount is not provided, it returns an array with all participants and a weight of 1
+  // if the amount is provided, it returns an array with the participants and the weight of the share
+  // the weight is calculated by dividing the amount by the number of participants
+  // if the amount is not divisible by the number of participants, it distributes the remainder equally among the participants
+  const buildParticipantsPayload = useMemo(() => {
+    return (amountCents: number | null) => {
+      const selected = Object.entries(participants)
+        .filter(([, value]) => value.selected)
+        .map(([userId, value]) => ({ userId, share: value.share.trim() }));
+
+      if (!amountCents || amountCents <= 0) {
+        return selected.map((entry) => ({ userId: entry.userId, weight: 1 }));
+      }
+
+      const specified = selected
+        .map((entry) => ({
+          userId: entry.userId,
+          shareCents: entry.share ? parseCurrencyToCents(entry.share) : null,
+        }))
+        .filter((entry) => entry.shareCents && entry.shareCents > 0) as Array<{
+          userId: string;
+          shareCents: number;
+        }>;
+
+      const specifiedIds = new Set(specified.map((entry) => entry.userId));
+      const unspecified = selected.filter(
+        (entry) => !specifiedIds.has(entry.userId)
+      );
+
+      const specifiedTotal = specified.reduce(
+        (sum, entry) => sum + entry.shareCents,
+        0
+      );
+      const remaining = amountCents - specifiedTotal;
+
+      const result: Array<{ userId: string; weight: number }> = [];
+
+      for (const entry of specified) {
+        result.push({ userId: entry.userId, weight: entry.shareCents });
+      }
+
+      if (unspecified.length > 0) {
+        const base = Math.floor(remaining / unspecified.length);
+        let remainder = remaining - base * unspecified.length;
+        const ordered = [...unspecified].sort((a, b) =>
+          a.userId.localeCompare(b.userId)
+        );
+        for (const entry of ordered) {
+          const extra = remainder > 0 ? 1 : 0;
+          if (remainder > 0) remainder -= 1;
+          result.push({ userId: entry.userId, weight: base + extra });
+        }
+      }
+
+      return result;
+    };
+  }, [participants]);
+
   const hasUsers = users.length > 0;
   const participantsPayload = useMemo(() => {
-    return Object.entries(participants)
-      .filter(([, value]) => value.selected)
-      .map(([userId, value]) => ({
-        userId,
-        weight: value.weight,
-      }));
-  }, [participants]);
+    const amountCents = parseCurrencyToCents(amount);
+    return buildParticipantsPayload(amountCents);
+  }, [amount, buildParticipantsPayload]);
 
   const paidByLabel =
     users.find((user) => user.id === paidById)?.name ?? "Select user";
@@ -78,6 +137,38 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
           toast.error("Please select who paid for this expense.");
           return;
         }
+        const amountCents = parseCurrencyToCents(amount);
+        if (!amountCents || amountCents <= 0) {
+          toast.error("Please enter a valid amount.");
+          return;
+        }
+        const invalidShare = Object.values(participants).some((p) => {
+          if (!p.selected || !p.share) return false;
+          const cents = parseCurrencyToCents(p.share);
+          return !cents || cents <= 0;
+        });
+        if (invalidShare) {
+          toast.error("Participant shares must be valid amounts.");
+          return;
+        }
+
+        const computedParticipants = buildParticipantsPayload(amountCents);
+        const computedTotal = computedParticipants.reduce(
+          (sum, entry) => sum + entry.weight,
+          0
+        );
+
+        if (computedTotal < amountCents) {
+          toast.error("Allocated shares are less than the total amount.");
+          return;
+        }
+        if (computedTotal > amountCents) {
+          toast.error("Allocated shares exceed the total amount.");
+          return;
+        }
+
+        formData.set("participants", JSON.stringify(computedParticipants));
+        formData.set("amount", String(amountCents));
         await action(formData);
         toast.success("Expense added successfully.");
         router.push("/");
@@ -116,11 +207,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
             value={JSON.stringify(participantsPayload)}
           />
           <input type="hidden" name="paidById" value={paidById} />
-          <input
-            type="hidden"
-            name="amount"
-            value={amount ? String(Number(amount) * 100) : ""}
-          />
+          <input type="hidden" name="amount" value={parseCurrencyToCents(amount) ?? ""} />
 
           <FieldGroup>
             <Field>
@@ -135,22 +222,17 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
               <FieldContent>
                 <Input
                   id="amount"
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="10000"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="100.00"
                   value={amount}
                   onChange={(event) => {
-                    const raw = event.target.value;
-                    const sanitized = raw.replace(/[^\d]/g, "");
-                    setAmount(sanitized);
+                    setAmount(sanitizeCurrencyInput(event.target.value));
                   }}
                   required
                 />
               </FieldContent>
-              <FieldDescription>Whole EGP only (no decimals).</FieldDescription>
+              <FieldDescription>Up to 2 decimals (e.g. 125.50).</FieldDescription>
             </Field>
 
             <Field>
@@ -158,11 +240,14 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline">
+                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
                       {paidByLabel}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
                     <DropdownMenuRadioGroup
                       value={paidById}
                       onValueChange={setPaidById}
@@ -182,12 +267,12 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
 
           <FieldSet>
             <FieldLegend>Participants</FieldLegend>
-            <FieldGroup>
+            <FieldGroup className="flex align-center justify-center">
               {users.map((user) => {
                 const state = participants[user.id];
                 return (
-                  <Field key={user.id} orientation="horizontal">
-                    <FieldLabel>
+                  <Field key={user.id} orientation="horizontal" className="items-center">
+                    <FieldLabel className="cursor-pointer">
                       <Checkbox
                         checked={state?.selected ?? false}
                         onCheckedChange={(
@@ -198,7 +283,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                             ...prev,
                             [user.id]: {
                               selected,
-                              weight: prev[user.id]?.weight ?? 1,
+                              share: prev[user.id]?.share ?? "",
                             },
                           }));
                         }}
@@ -208,23 +293,17 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                     </FieldLabel>
                     <FieldContent>
                       <Input
-                        type="number"
-                        min={1}
-                        step={1}
-                        inputMode="numeric"
-                        pattern="[0-9]*"
+                        type="text"
+                        inputMode="decimal"
                         className="w-24"
-                        value={state?.weight ?? 1}
+                        placeholder="Share"
+                        value={state?.share ?? ""}
                         onChange={(event) => {
-                          const raw = event.target.value;
-                          const parsed = Number.parseInt(raw, 10);
-                          const weight =
-                            Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
                           setParticipants((prev) => ({
                             ...prev,
                             [user.id]: {
                               selected: prev[user.id]?.selected ?? false,
-                              weight,
+                              share: sanitizeCurrencyInput(event.target.value),
                             },
                           }));
                         }}
@@ -236,11 +315,12 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
               })}
             </FieldGroup>
             <FieldDescription>
-              Uncheck users to exclude them. Weights are integer shares.
+              Optional: enter exact share amounts (EGP). Blank splits the
+              remaining amount equally.
             </FieldDescription>
           </FieldSet>
 
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} className="cursor-pointer">
             {isPending ? "Creating..." : "Create Expense"}
           </Button>
         </form>

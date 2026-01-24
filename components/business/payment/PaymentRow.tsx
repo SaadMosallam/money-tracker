@@ -1,6 +1,7 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
+import { formatDateTime } from "@/lib/utils/date";
 
 type PaymentRowProps = {
   id: string;
@@ -29,7 +30,7 @@ export function PaymentRow({
         <Money cents={amount} />
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        {createdAt ? createdAt.toLocaleDateString() : "—"}
+        {createdAt ? formatDateTime(createdAt) : "—"}
       </TableCell>
     </TableRow>
   );
