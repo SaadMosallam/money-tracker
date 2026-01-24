@@ -60,9 +60,39 @@ export default async function ExpensesPage() {
     };
   });
 
+  const unsettledRows = rows.filter((row) => !row.isSettled);
+  const settledRows = rows.filter((row) => row.isSettled);
+
   return (
     <PageContainer title="Expenses" maxWidthClassName="max-w-6xl">
-      <ExpenseList rows={rows} />
+      <div className="space-y-6">
+        <ExpenseList
+          rows={unsettledRows}
+          title="Unsettled Expenses"
+          emptyMessage="No unsettled expenses."
+        />
+
+        <details className="rounded-xl border bg-card text-card-foreground shadow">
+          <summary className="cursor-pointer select-none px-6 py-4 text-sm font-semibold">
+            Settled Expenses ({settledRows.length})
+          </summary>
+          <div className="px-6 pb-6">
+            {settledRows.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No settled expenses yet.
+              </div>
+            ) : (
+              <ExpenseList
+                rows={settledRows}
+                title="Settled Expenses"
+                emptyMessage="No settled expenses yet."
+                variant="plain"
+                showTitle={false}
+              />
+            )}
+          </div>
+        </details>
+      </div>
     </PageContainer>
   );
 }
