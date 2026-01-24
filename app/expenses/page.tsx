@@ -22,13 +22,26 @@ export default async function ExpensesPage() {
 
   const rows = expenses.map((expense) => {
     const list = participantsByExpense.get(expense.id) ?? [];
+    const totalWeight = list.reduce((sum, p) => sum + p.weight, 0);
+    const hasEqualShares =
+      list.length > 0 && list.every((p) => p.weight === list[0].weight);
+    const percentFormatter = new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
     const participantsLabel =
       list.length === 0
         ? "—"
+        : hasEqualShares
+        ? list
+            .map((p) => userNameById[p.userId] ?? p.userId)
+            .join(", ")
         : list
           .map((p) => {
             const name = userNameById[p.userId] ?? p.userId;
-            return p.weight === 1 ? name : `${name} (${p.weight})`;
+            const percent =
+              totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
+            return `${name} (${percentFormatter.format(percent)}%)`;
           })
           .join(", ");
 
@@ -44,7 +57,7 @@ export default async function ExpensesPage() {
   });
 
   return (
-    <PageContainer title="Expenses">
+    <PageContainer title="Expenses" maxWidthClassName="max-w-6xl">
       <ExpenseList rows={rows} />
     </PageContainer>
   );
