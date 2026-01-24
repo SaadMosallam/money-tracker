@@ -17,6 +17,7 @@ import {
   FieldContent,
   FieldDescription,
   FieldGroup,
+  FieldError,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,12 @@ type PaymentCreateFormProps = {
 export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    fromUserId?: string;
+    toUserId?: string;
+    amount?: string;
+  }>({});
   const [amount, setAmount] = useState("");
   const [fromUserId, setFromUserId] = useState(users[0]?.id ?? "");
   const [toUserId, setToUserId] = useState(users[1]?.id ?? users[0]?.id ?? "");
@@ -57,13 +64,22 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
 
     startTransition(async () => {
       try {
+        setErrorMessage(null);
+        setFieldErrors({});
+        const nextErrors: typeof fieldErrors = {};
         if (!fromUserId || !toUserId || fromUserId === toUserId) {
-          toast.error("Please select two different users.");
-          return;
+          nextErrors.fromUserId = "From is required.";
+          nextErrors.toUserId = "To must be different.";
+          setErrorMessage("Please select two different users.");
         }
         const amountCents = parseCurrencyToCents(amount);
         if (!amountCents || amountCents <= 0) {
-          toast.error("Please enter a valid amount.");
+          nextErrors.amount = "Amount is required.";
+          setErrorMessage("Please enter a valid amount.");
+        }
+        if (Object.keys(nextErrors).length > 0) {
+          setFieldErrors(nextErrors);
+          toast.error("Please fix the highlighted fields.");
           return;
         }
         await action(formData);
@@ -71,6 +87,8 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         router.push("/");
       } catch (error) {
         console.error(error);
+        setFieldErrors({});
+        setErrorMessage("Something went wrong. Please try again.");
         toast.error("Something went wrong. Please try again.");
       }
     });
@@ -104,11 +122,20 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
 
           <FieldGroup>
             <Field>
-              <FieldLabel>From</FieldLabel>
+              <FieldLabel>
+                From <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`w-full justify-between cursor-pointer ${fieldErrors.fromUserId
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                        }`}
+                    >
                       {fromUserLabel}
                     </Button>
                   </DropdownMenuTrigger>
@@ -120,6 +147,12 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                       value={fromUserId}
                       onValueChange={(value) => {
                         setFromUserId(value);
+                        if (fieldErrors.fromUserId) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            fromUserId: undefined,
+                          }));
+                        }
                         if (value === toUserId) {
                           setToUserId(getAlternateUserId(value));
                         }
@@ -139,14 +172,26 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                 </DropdownMenu>
               </FieldContent>
               <FieldDescription>Who paid the money.</FieldDescription>
+              {fieldErrors.fromUserId && (
+                <FieldError>{fieldErrors.fromUserId}</FieldError>
+              )}
             </Field>
 
             <Field>
-              <FieldLabel>To</FieldLabel>
+              <FieldLabel>
+                To <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`w-full justify-between cursor-pointer ${fieldErrors.toUserId
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                        }`}
+                    >
                       {toUserLabel}
                     </Button>
                   </DropdownMenuTrigger>
@@ -158,6 +203,12 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                       value={toUserId}
                       onValueChange={(value) => {
                         setToUserId(value);
+                        if (fieldErrors.toUserId) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            toUserId: undefined,
+                          }));
+                        }
                         if (value === fromUserId) {
                           setFromUserId(getAlternateUserId(value));
                         }
@@ -177,10 +228,15 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                 </DropdownMenu>
               </FieldContent>
               <FieldDescription>Who received the money.</FieldDescription>
+              {fieldErrors.toUserId && (
+                <FieldError>{fieldErrors.toUserId}</FieldError>
+              )}
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="amount">Amount (EGP)</FieldLabel>
+              <FieldLabel htmlFor="amount">
+                Amount (EGP) <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
                 <Input
                   id="amount"
@@ -190,17 +246,30 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                   value={amount}
                   onChange={(event) => {
                     setAmount(sanitizeCurrencyInput(event.target.value));
+                    if (fieldErrors.amount) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        amount: undefined,
+                      }));
+                    }
                   }}
-                  required
+                  className={
+                    fieldErrors.amount
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : undefined
+                  }
                 />
               </FieldContent>
               <FieldDescription>Up to 2 decimals (e.g. 125.50).</FieldDescription>
+              {fieldErrors.amount && <FieldError>{fieldErrors.amount}</FieldError>}
             </Field>
           </FieldGroup>
 
           <Button type="submit" disabled={isPending} className="cursor-pointer">
             {isPending ? "Creating..." : "Create Payment"}
           </Button>
+
+          {errorMessage && <FieldError>{errorMessage}</FieldError>}
         </form>
       </CardContent>
     </Card>

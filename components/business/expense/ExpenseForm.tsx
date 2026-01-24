@@ -18,6 +18,7 @@ import {
   FieldContent,
   FieldDescription,
   FieldGroup,
+  FieldError,
   FieldLabel,
   FieldLegend,
   FieldSet,
@@ -46,6 +47,13 @@ type ParticipantState = Record<
 export function ExpenseForm({ users, action }: ExpenseFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    title?: string;
+    amount?: string;
+    paidById?: string;
+    participants?: string;
+  }>({});
   const [amount, setAmount] = useState("");
   const [paidById, setPaidById] = useState(users[0]?.id ?? "");
   const [participants, setParticipants] = useState<ParticipantState>(() => {
@@ -129,13 +137,35 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
 
     startTransition(async () => {
       try {
+        setErrorMessage(null);
+        setFieldErrors({});
+        const title = String(formData.get("title") ?? "").trim();
+        const selectedCount = Object.values(participants).filter(
+          (p) => p.selected
+        ).length;
+
+        const nextErrors: typeof fieldErrors = {};
+        if (!title) {
+          nextErrors.title = "Title is required.";
+        }
         if (!paidById) {
-          toast.error("Please select who paid for this expense.");
-          return;
+          nextErrors.paidById = "Paid by is required.";
+          setErrorMessage("Please select who paid for this expense.");
         }
         const amountCents = parseCurrencyToCents(amount);
         if (!amountCents || amountCents <= 0) {
-          toast.error("Please enter a valid amount.");
+          nextErrors.amount = "Amount is required.";
+          setErrorMessage("Please enter a valid amount.");
+        }
+        if (selectedCount === 0) {
+          nextErrors.participants = "Select at least one participant.";
+        }
+        if (Object.keys(nextErrors).length > 0) {
+          setFieldErrors(nextErrors);
+          toast.error("Please fix the highlighted fields.");
+          return;
+        }
+        if (!amountCents) {
           return;
         }
         const invalidShare = Object.values(participants).some((p) => {
@@ -144,32 +174,50 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
           return !cents || cents <= 0;
         });
         if (invalidShare) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            participants: "Participant shares must be valid amounts.",
+          }));
+          setErrorMessage("Participant shares must be valid amounts.");
           toast.error("Participant shares must be valid amounts.");
           return;
         }
 
-        const computedParticipants = buildParticipantsPayload(amountCents);
+        const validAmountCents = amountCents;
+        const computedParticipants = buildParticipantsPayload(validAmountCents);
         const computedTotal = computedParticipants.reduce(
           (sum, entry) => sum + entry.weight,
           0
         );
 
-        if (computedTotal < amountCents) {
+        if (computedTotal < validAmountCents) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            participants: "Allocated shares are less than the total amount.",
+          }));
+          setErrorMessage("Allocated shares are less than the total amount.");
           toast.error("Allocated shares are less than the total amount.");
           return;
         }
-        if (computedTotal > amountCents) {
+        if (computedTotal > validAmountCents) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            participants: "Allocated shares exceed the total amount.",
+          }));
+          setErrorMessage("Allocated shares exceed the total amount.");
           toast.error("Allocated shares exceed the total amount.");
           return;
         }
 
         formData.set("participants", JSON.stringify(computedParticipants));
-        formData.set("amount", String(amountCents));
+        formData.set("amount", String(validAmountCents));
         await action(formData);
         toast.success("Expense added successfully.");
         router.push("/");
       } catch (error) {
         console.error(error);
+        setFieldErrors({});
+        setErrorMessage("Something went wrong. Please try again.");
         toast.error("Something went wrong. Please try again.");
       }
     });
@@ -207,14 +255,33 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
 
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="title">Title</FieldLabel>
+              <FieldLabel htmlFor="title">
+                Title <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
-                <Input id="title" name="title" placeholder="Dinner" required />
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Dinner"
+                  className={
+                    fieldErrors.title
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : undefined
+                  }
+                  onChange={() => {
+                    if (fieldErrors.title) {
+                      setFieldErrors((prev) => ({ ...prev, title: undefined }));
+                    }
+                  }}
+                />
               </FieldContent>
+              {fieldErrors.title && <FieldError>{fieldErrors.title}</FieldError>}
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="amount">Amount (EGP)</FieldLabel>
+              <FieldLabel htmlFor="amount">
+                Amount (EGP) <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
                 <Input
                   id="amount"
@@ -224,19 +291,39 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                   value={amount}
                   onChange={(event) => {
                     setAmount(sanitizeCurrencyInput(event.target.value));
+                    if (fieldErrors.amount) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        amount: undefined,
+                      }));
+                    }
                   }}
-                  required
+                  className={
+                    fieldErrors.amount
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : undefined
+                  }
                 />
               </FieldContent>
               <FieldDescription>Up to 2 decimals (e.g. 125.50).</FieldDescription>
+              {fieldErrors.amount && <FieldError>{fieldErrors.amount}</FieldError>}
             </Field>
 
             <Field>
-              <FieldLabel>Paid By</FieldLabel>
+              <FieldLabel>
+                Paid By <span className="text-destructive">*</span>
+              </FieldLabel>
               <FieldContent>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline" className="w-full justify-between cursor-pointer">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`w-full justify-between cursor-pointer ${fieldErrors.paidById
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                        }`}
+                    >
                       {paidByLabel}
                     </Button>
                   </DropdownMenuTrigger>
@@ -246,7 +333,15 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                   >
                     <DropdownMenuRadioGroup
                       value={paidById}
-                      onValueChange={setPaidById}
+                      onValueChange={(value) => {
+                        setPaidById(value);
+                        if (fieldErrors.paidById) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            paidById: undefined,
+                          }));
+                        }
+                      }}
                     >
                       {users.map((user) => (
                         <DropdownMenuRadioItem key={user.id} value={user.id}>
@@ -258,11 +353,16 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                 </DropdownMenu>
               </FieldContent>
               <FieldDescription>Select who paid for this expense.</FieldDescription>
+              {fieldErrors.paidById && (
+                <FieldError>{fieldErrors.paidById}</FieldError>
+              )}
             </Field>
           </FieldGroup>
 
           <FieldSet>
-            <FieldLegend>Participants</FieldLegend>
+            <FieldLegend>
+              Participants <span className="text-destructive">*</span>
+            </FieldLegend>
             <FieldGroup className="flex align-center justify-center">
               {users.map((user) => {
                 const state = participants[user.id];
@@ -282,6 +382,12 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                               share: prev[user.id]?.share ?? "",
                             },
                           }));
+                          if (fieldErrors.participants) {
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              participants: undefined,
+                            }));
+                          }
                         }}
                         id={`participant-${user.id}`}
                       />
@@ -302,6 +408,12 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                               share: sanitizeCurrencyInput(event.target.value),
                             },
                           }));
+                          if (fieldErrors.participants) {
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              participants: undefined,
+                            }));
+                          }
                         }}
                         disabled={!state?.selected}
                       />
@@ -314,11 +426,16 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
               Optional: enter exact share amounts (EGP). Blank splits the
               remaining amount equally.
             </FieldDescription>
+            {fieldErrors.participants && (
+              <FieldError>{fieldErrors.participants}</FieldError>
+            )}
           </FieldSet>
 
           <Button type="submit" disabled={isPending} className="cursor-pointer">
             {isPending ? "Creating..." : "Create Expense"}
           </Button>
+
+          {errorMessage && <FieldError>{errorMessage}</FieldError>}
         </form>
       </CardContent>
     </Card>
