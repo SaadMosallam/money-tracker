@@ -2,7 +2,7 @@ import { getPayments } from "@/lib/db/queries/balances";
 import { getUsers } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { PaymentList } from "@/components/business/payment/PaymentForm";
-import { buildUserNameById } from "@/lib/ui/utils/userNameById";
+import { buildUserNameById } from "@/lib/utils/userNameById";
 
 export default async function PaymentsPage() {
   const [payments, users] = await Promise.all([getPayments(), getUsers()]);

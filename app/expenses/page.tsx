@@ -2,7 +2,7 @@ import { getExpenses, getExpenseParticipants } from "@/lib/db/queries/balances";
 import { getUsers } from "@/lib/db/queries/users";
 import { ExpenseList } from "@/components/business/expense/ExpenseList";
 import { PageContainer } from "@/components/business/layout/PageContainer";
-import { buildUserNameById } from "@/lib/ui/utils/userNameById";
+import { buildUserNameById } from "@/lib/utils/userNameById";
 
 export default async function ExpensesPage() {
   const [expenses, participants, users] = await Promise.all([
@@ -26,11 +26,11 @@ export default async function ExpensesPage() {
       list.length === 0
         ? "—"
         : list
-            .map((p) => {
-              const name = userNameById[p.userId] ?? p.userId;
-              return p.weight === 1 ? name : `${name} (${p.weight})`;
-            })
-            .join(", ");
+          .map((p) => {
+            const name = userNameById[p.userId] ?? p.userId;
+            return p.weight === 1 ? name : `${name} (${p.weight})`;
+          })
+          .join(", ");
 
     return {
       id: expense.id,

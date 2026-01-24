@@ -3,7 +3,7 @@ import { getUsers } from "@/lib/db/queries/users";
 
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { BalanceTable, PairwiseDebts } from "@/components/business/balance";
-import { buildUserNameById } from "@/lib/ui/utils/userNameById";
+import { buildUserNameById } from "@/lib/utils/userNameById";
 
 export default async function Home() {
   const [balances, users] = await Promise.all([getBalances(), getUsers()]);
