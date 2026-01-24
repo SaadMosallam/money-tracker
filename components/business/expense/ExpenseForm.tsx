@@ -55,6 +55,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
     return initial;
   });
 
+  const hasUsers = users.length > 0;
   const participantsPayload = useMemo(() => {
     return Object.entries(participants)
       .filter(([, value]) => value.selected)
@@ -73,6 +74,10 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
 
     startTransition(async () => {
       try {
+        if (!paidById) {
+          toast.error("Please select who paid for this expense.");
+          return;
+        }
         await action(formData);
         toast.success("Expense added successfully.");
         router.push("/");
@@ -82,6 +87,21 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
       }
     });
   };
+
+  if (!hasUsers) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>New Expense</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Add users first before creating expenses.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

@@ -38,6 +38,10 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
   const [fromUserId, setFromUserId] = useState(users[0]?.id ?? "");
   const [toUserId, setToUserId] = useState(users[1]?.id ?? users[0]?.id ?? "");
 
+  const hasUsers = users.length > 0;
+  const getAlternateUserId = (excludeId: string) =>
+    users.find((user) => user.id !== excludeId)?.id ?? "";
+
   const fromUserLabel = useMemo(() => {
     return users.find((user) => user.id === fromUserId)?.name ?? "Select user";
   }, [users, fromUserId]);
@@ -52,6 +56,10 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
 
     startTransition(async () => {
       try {
+        if (!fromUserId || !toUserId || fromUserId === toUserId) {
+          toast.error("Please select two different users.");
+          return;
+        }
         await action(formData);
         toast.success("Payment added successfully.");
         router.push("/");
@@ -61,6 +69,21 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
       }
     });
   };
+
+  if (!hasUsers) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>New Payment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Add users first before creating payments.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -90,10 +113,19 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                   <DropdownMenuContent align="start">
                     <DropdownMenuRadioGroup
                       value={fromUserId}
-                      onValueChange={setFromUserId}
+                      onValueChange={(value) => {
+                        setFromUserId(value);
+                        if (value === toUserId) {
+                          setToUserId(getAlternateUserId(value));
+                        }
+                      }}
                     >
                       {users.map((user) => (
-                        <DropdownMenuRadioItem key={user.id} value={user.id}>
+                        <DropdownMenuRadioItem
+                          key={user.id}
+                          value={user.id}
+                          disabled={user.id === toUserId}
+                        >
                           {user.name}
                         </DropdownMenuRadioItem>
                       ))}
@@ -116,10 +148,19 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                   <DropdownMenuContent align="start">
                     <DropdownMenuRadioGroup
                       value={toUserId}
-                      onValueChange={setToUserId}
+                      onValueChange={(value) => {
+                        setToUserId(value);
+                        if (value === fromUserId) {
+                          setFromUserId(getAlternateUserId(value));
+                        }
+                      }}
                     >
                       {users.map((user) => (
-                        <DropdownMenuRadioItem key={user.id} value={user.id}>
+                        <DropdownMenuRadioItem
+                          key={user.id}
+                          value={user.id}
+                          disabled={user.id === fromUserId}
+                        >
                           {user.name}
                         </DropdownMenuRadioItem>
                       ))}
