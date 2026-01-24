@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   ArrowRightLeft,
   LayoutDashboard,
-  ListOrdered,
   PlusCircle,
   Receipt,
+  BanknoteArrowUp
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { href: "/expenses", label: "Expenses", icon: <Receipt className="h-4 w-4" /> },
   { href: "/payments", label: "Payments", icon: <ArrowRightLeft className="h-4 w-4" /> },
   { href: "/expenses/new", label: "New Expense", icon: <PlusCircle className="h-4 w-4" /> },
-  { href: "/payments/new", label: "New Payment", icon: <ListOrdered className="h-4 w-4" /> },
+  { href: "/payments/new", label: "New Payment", icon: <BanknoteArrowUp className="h-4 w-4" /> },
 ];
 
 const isActive = (pathname: string, href: string) => {
