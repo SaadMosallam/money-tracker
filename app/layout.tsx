@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { AppNav } from "@/components/business/layout/AppNav";
+import { AuthSessionProvider } from "@/components/auth/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Money Tracker",
   description: "Track your expenses and balances among a group of friends",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -30,13 +34,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AppNav />
-          <div className="min-h-screen pb-20 pt-0 md:pb-0 md:pt-14">
-            {children}
-          </div>
-        </ThemeProvider>
-        <Toaster />
+        <AuthSessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <AppNav />
+            <div className="min-h-screen pb-20 pt-0 md:pb-0 md:pt-14">
+              {children}
+            </div>
+          </ThemeProvider>
+          <Toaster />
+        </AuthSessionProvider>
       </body>
     </html>
   );
