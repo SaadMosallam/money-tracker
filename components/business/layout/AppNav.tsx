@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signIn, signOut, useSession } from "next-auth/react";
 import {
   ArrowRightLeft,
   LayoutDashboard,
   PlusCircle,
   Receipt,
-  BanknoteArrowUp
+  BanknoteArrowUp,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -42,9 +45,50 @@ const isActive = (pathname: string, href: string) => {
 
 export function AppNav() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const displayName = session?.user?.name ?? session?.user?.email ?? "Account";
+  const authActionClassName =
+    "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60";
+  const authActionClassNameMobile =
+    "flex items-center gap-1 rounded-md px-2 py-1 text-[10px] leading-tight transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60";
 
   return (
     <>
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-4 py-2 backdrop-blur md:hidden">
+        {pathname === "/" ? (
+          <span className="text-sm font-semibold tracking-tight text-foreground">
+            Money Tracker
+          </span>
+        ) : (
+          <Link
+            href="/"
+            className="text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
+          >
+            Money Tracker
+          </Link>
+        )}
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className={authActionClassNameMobile}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => signIn()}
+            className={authActionClassNameMobile}
+          >
+            <LogIn className="h-4 w-4" />
+            Sign in
+          </button>
+        )}
+      </header>
+
       <header className="sticky top-0 z-40 hidden border-b bg-background/95 backdrop-blur md:block">
         <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center px-4">
           {pathname === "/" ? (
@@ -79,12 +123,30 @@ export function AppNav() {
               );
             })}
           </nav>
-          <span
-            className="text-sm font-semibold tracking-tight text-foreground/0 select-none"
-            aria-hidden="true"
-          >
-            Money Tracker
-          </span>
+          <div className="flex items-center justify-end gap-2 text-sm">
+            {isAuthenticated && (
+              <span className="text-foreground">Hi, {displayName}</span>
+            )}
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className={authActionClassName}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => signIn()}
+                className={authActionClassName}
+              >
+                <LogIn className="h-4 w-4" />
+                Sign in
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
