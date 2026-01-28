@@ -45,6 +45,7 @@ const isActive = (pathname: string, href: string) => {
 
 export function AppNav() {
   const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const displayName = session?.user?.name ?? session?.user?.email ?? "Account";
@@ -68,21 +69,22 @@ export function AppNav() {
             Money Tracker
           </Link>
         )}
-        {isAuthenticated ? (
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className={authActionClassNameMobile}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
-        ) : (
-          <Link href="/login" className={authActionClassNameMobile}>
-            <LogIn className="h-4 w-4" />
-            Sign in
-          </Link>
-        )}
+        {!isLoginPage &&
+          (isAuthenticated ? (
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className={authActionClassNameMobile}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
+          ) : (
+            <Link href="/login" className={authActionClassNameMobile}>
+              <LogIn className="h-4 w-4" />
+              Sign in
+            </Link>
+          ))}
       </header>
 
       <header className="sticky top-0 z-40 hidden border-b bg-background/95 backdrop-blur md:block">
@@ -99,7 +101,61 @@ export function AppNav() {
               Money Tracker
             </Link>
           )}
-          <nav className="flex items-center justify-center gap-3 text-sm">
+          {isLoginPage ? (
+            <>
+              <div />
+              <div />
+            </>
+          ) : (
+            <>
+              <nav className="flex items-center justify-center gap-3 text-sm">
+                {navItems.map((item) => {
+                  const active = isActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors",
+                        active
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                      )}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="flex items-center justify-end gap-2 text-sm">
+                {isAuthenticated && (
+                  <span className="text-foreground">Hi, {displayName}</span>
+                )}
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className={authActionClassName}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </button>
+                ) : (
+                  <Link href="/login" className={authActionClassName}>
+                    <LogIn className="h-4 w-4" />
+                    Sign in
+                  </Link>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </header>
+
+      {!isLoginPage && (
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
+          <div className="grid grid-cols-5">
             {navItems.map((item) => {
               const active = isActive(pathname, item.href);
               return (
@@ -107,63 +163,20 @@ export function AppNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors",
-                    active
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
+                    active ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
                   {item.icon}
-                  {item.label}
+                  <span className="whitespace-normal">
+                    {item.mobileLabel ?? item.label}
+                  </span>
                 </Link>
               );
             })}
-          </nav>
-          <div className="flex items-center justify-end gap-2 text-sm">
-            {isAuthenticated && (
-              <span className="text-foreground">Hi, {displayName}</span>
-            )}
-            {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className={authActionClassName}
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </button>
-            ) : (
-              <Link href="/login" className={authActionClassName}>
-                <LogIn className="h-4 w-4" />
-                Sign in
-              </Link>
-            )}
           </div>
-        </div>
-      </header>
-
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-        <div className="grid grid-cols-5">
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
-                  active ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {item.icon}
-                <span className="whitespace-normal">
-                  {item.mobileLabel ?? item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+        </nav>
+      )}
     </>
   );
 }
