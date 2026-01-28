@@ -2,18 +2,22 @@
 
 import { db } from "@/lib/db";
 import { expenses, expenseParticipants } from "@/lib/db/schema";
-import { validateExpenseRows, validateExpenseParticipantRows } from "@/lib/validation/rows";
+import {
+  validateExpenseRows,
+  validateExpenseParticipantRows,
+} from "@/lib/validation/rows";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
 
 export async function createExpense(formData: FormData) {
   const title = String(formData.get("title"));
   const amount = Number(formData.get("amount"));
   const paidById = String(formData.get("paidById"));
-  const participants = JSON.parse(
-    String(formData.get("participants"))
-  ) as { userId: string; weight: number }[];
-
+  const participants = JSON.parse(String(formData.get("participants"))) as {
+    userId: string;
+    weight: number;
+  }[];
 
   // ---------- 1️⃣ Basic domain validation ----------
   if (!Number.isInteger(amount) || amount <= 0) {
@@ -23,7 +27,7 @@ export async function createExpense(formData: FormData) {
   if (participants.length === 0) {
     throw new Error("expense must have at least one participant");
   }
-  
+
   if (!title || title.trim().length === 0) {
     throw new Error("title is required");
   }
@@ -66,4 +70,5 @@ export async function createExpense(formData: FormData) {
   // ---------- 5️⃣ Revalidate dashboard ----------
   revalidatePath("/");
   revalidatePath("/expenses");
+  redirect("/");
 }

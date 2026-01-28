@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +44,6 @@ type ParticipantState = Record<
 >;
 
 export function ExpenseForm({ users, action }: ExpenseFormProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
@@ -213,8 +211,6 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
         formData.set("amount", String(validAmountCents));
         await action(formData);
         toast.success("Expense added successfully.");
-        router.push("/");
-        router.refresh();
       } catch (error) {
         console.error(error);
         setFieldErrors({});

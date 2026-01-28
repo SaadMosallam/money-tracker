@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { payments } from "@/lib/db/schema";
 import { validatePaymentRows } from "@/lib/validation/rows";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
 
 export async function createPayment(formData: FormData): Promise<void> {
@@ -43,4 +44,5 @@ export async function createPayment(formData: FormData): Promise<void> {
   // ---------- 4️⃣ Revalidate ----------
   revalidatePath("/");
   revalidatePath("/payments");
+  redirect("/");
 }

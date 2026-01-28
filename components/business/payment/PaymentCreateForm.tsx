@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +33,6 @@ type PaymentCreateFormProps = {
 };
 
 export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
@@ -84,8 +82,6 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         }
         await action(formData);
         toast.success("Payment added successfully.");
-        router.push("/");
-        router.refresh();
       } catch (error) {
         console.error(error);
         setFieldErrors({});
