@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   ArrowRightLeft,
   LayoutDashboard,
@@ -78,14 +78,10 @@ export function AppNav() {
             Sign out
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={() => signIn()}
-            className={authActionClassNameMobile}
-          >
+          <Link href="/login" className={authActionClassNameMobile}>
             <LogIn className="h-4 w-4" />
             Sign in
-          </button>
+          </Link>
         )}
       </header>
 
@@ -137,14 +133,10 @@ export function AppNav() {
                 Sign out
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => signIn()}
-                className={authActionClassName}
-              >
+              <Link href="/login" className={authActionClassName}>
                 <LogIn className="h-4 w-4" />
                 Sign in
-              </button>
+              </Link>
             )}
           </div>
         </div>

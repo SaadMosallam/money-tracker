@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,14 @@ export function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const authError = searchParams.get("error");
 
+  useEffect(() => {
+    if (!searchParams.get("callbackUrl")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("callbackUrl", "/");
+      router.replace(`/login?${params.toString()}`);
+    }
+  }, [router, searchParams]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
@@ -37,19 +45,15 @@ export function LoginForm() {
 
     startTransition(async () => {
       const result = await signIn("credentials", {
-        redirect: false,
+        redirect: true,
         email,
         password,
         callbackUrl,
       });
 
-      if (!result || result.error) {
+      if (result?.error) {
         setErrorMessage("Invalid email or password.");
-        return;
       }
-
-      router.push(callbackUrl);
-      router.refresh();
     });
   };
 
