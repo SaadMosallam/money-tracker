@@ -214,6 +214,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
         await action(formData);
         toast.success("Expense added successfully.");
         router.push("/");
+        router.refresh();
       } catch (error) {
         console.error(error);
         setFieldErrors({});
@@ -320,8 +321,8 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
                       type="button"
                       variant="outline"
                       className={`w-full justify-between cursor-pointer ${fieldErrors.paidById
-                          ? "border-destructive focus-visible:ring-destructive"
-                          : ""
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
                         }`}
                     >
                       {paidByLabel}

@@ -85,6 +85,7 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         await action(formData);
         toast.success("Payment added successfully.");
         router.push("/");
+        router.refresh();
       } catch (error) {
         console.error(error);
         setFieldErrors({});
