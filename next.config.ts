@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
-const nextConfig: NextConfig = {};
+type WorkboxMatch = (options: { request: Request }) => boolean;
+
+const nextConfig: NextConfig = {
+  turbopack: {},
+};
 
 export default withPWA({
   dest: "public",
@@ -13,7 +17,7 @@ export default withPWA({
   },
   runtimeCaching: [
     {
-      urlPattern: ({ request }) => request.destination === "document",
+      urlPattern: (({ request }) => request.destination === "document") satisfies WorkboxMatch,
       handler: "NetworkFirst",
       options: {
         cacheName: "pages",
@@ -21,10 +25,10 @@ export default withPWA({
       },
     },
     {
-      urlPattern: ({ request }) =>
+      urlPattern: (({ request }) =>
         ["style", "script", "worker", "image", "font"].includes(
           request.destination
-        ),
+        )) satisfies WorkboxMatch,
       handler: "CacheFirst",
       options: {
         cacheName: "assets",
