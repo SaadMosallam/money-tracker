@@ -49,9 +49,9 @@ export function AppNav() {
   const isAuthenticated = status === "authenticated";
   const displayName = session?.user?.name ?? session?.user?.email ?? "Account";
   const authActionClassName =
-    "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60";
+    "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60 cursor-pointer";
   const authActionClassNameMobile =
-    "flex items-center gap-1 rounded-md px-2 py-1 text-[10px] leading-tight transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60";
+    "flex items-center gap-1 rounded-md px-2 py-1 text-[10px] leading-tight transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60 cursor-pointer";
 
   return (
     <>

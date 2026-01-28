@@ -95,7 +95,11 @@ export function LoginForm() {
               </FieldError>
             )}
           </FieldSet>
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            className="w-full cursor-pointer disabled:cursor-not-allowed"
+            disabled={isPending}
+          >
             {isPending ? "Signing in..." : "Sign in"}
           </Button>
         </form>
