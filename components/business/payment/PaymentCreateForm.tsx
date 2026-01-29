@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { parseCurrencyToCents, sanitizeCurrencyInput } from "@/lib/utils/currency";
+import { isNextRedirect } from "@/lib/utils/isRedirectError";
 
 type UserOption = {
   id: string;
@@ -83,6 +84,10 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         await action(formData);
         toast.success("Payment added successfully.");
       } catch (error) {
+        if (isNextRedirect(error)) {
+          toast.success("Payment added successfully.");
+          return;
+        }
         console.error(error);
         setFieldErrors({});
         setErrorMessage("Something went wrong. Please try again.");
