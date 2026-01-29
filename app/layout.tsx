@@ -20,7 +20,10 @@ export const metadata: Metadata = {
   title: "Money Tracker",
   description: "Track your expenses and balances among a group of friends",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/icons/icon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+    ],
   },
 };
 
