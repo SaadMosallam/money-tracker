@@ -106,14 +106,16 @@ export function AppNav() {
     <>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-4 py-2 backdrop-blur md:hidden">
         {pathname === "/" ? (
-          <span className="text-sm font-semibold tracking-tight text-foreground">
+          <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+            <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
             Money Tracker
           </span>
         ) : (
           <Link
             href="/"
-            className="text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
+            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
           >
+            <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
             Money Tracker
           </Link>
         )}
@@ -138,14 +140,16 @@ export function AppNav() {
       <header className="sticky top-0 z-40 hidden border-b bg-background/95 backdrop-blur md:block">
         <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center px-4">
           {pathname === "/" ? (
-            <span className="text-sm font-semibold tracking-tight text-foreground">
+            <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+              <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
               Money Tracker
             </span>
           ) : (
             <Link
               href="/"
-              className="text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
+              className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
             >
+              <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
               Money Tracker
             </Link>
           )}
