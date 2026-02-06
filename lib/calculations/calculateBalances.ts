@@ -1,6 +1,13 @@
 import { validateBalanceDataset } from "@/lib/validation/validateBalanceDataset";
-import { BalanceByUserId, CalculateBalancesInput } from "@/lib/types/expensesTypes";
-import { validateExpenseParticipantRows, validateExpenseRows, validatePaymentRows } from "@/lib/validation/rows";
+import {
+  BalanceByUserId,
+  CalculateBalancesInput,
+} from "@/lib/types/expensesTypes";
+import {
+  validateExpenseParticipantRows,
+  validateExpenseRows,
+  validatePaymentRows,
+} from "@/lib/validation/rows";
 import { splitAmountByWeights } from "@/lib/calculations/splitAmountByWeights";
 
 export function calculateBalances(input: CalculateBalancesInput) {
@@ -21,7 +28,6 @@ export function calculateBalances(input: CalculateBalancesInput) {
   // Step 2: aggregate validation
   validateBalanceDataset(input);
 
-
   // Step 3: initialize balances
   const balances: BalanceByUserId = {};
   for (const userId of userIds) {
@@ -34,19 +40,16 @@ export function calculateBalances(input: CalculateBalancesInput) {
     }
   };
 
-  // Step 4: apply unsettled expenses
-  for (const expense of expenses) {  
+  // Step 4: apply all expenses including settled ones
+  for (const expense of expenses) {
     const expenseParticipants = participants.filter(
-      (p) => p.expenseId === expense.id
+      (p) => p.expenseId === expense.id,
     );
-  
+
     if (expenseParticipants.length === 0) continue; // defensive, though validated
-  
-    const shares = splitAmountByWeights(
-      expense.amount,
-      expenseParticipants
-    );
-  
+
+    const shares = splitAmountByWeights(expense.amount, expenseParticipants);
+
     for (const userId in shares) {
       if (userId === expense.paidById) continue;
       ensureBalance(userId);

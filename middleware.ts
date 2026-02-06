@@ -8,8 +8,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith("/login")
+    pathname.startsWith("/favicon.ico")
   ) {
     return NextResponse.next();
   }
@@ -18,6 +17,17 @@ export async function middleware(request: NextRequest) {
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
+
+  if (pathname === "/login") {
+    if (token) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
   if (!token) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = "/login";
@@ -27,19 +37,12 @@ export async function middleware(request: NextRequest) {
     );
     return NextResponse.redirect(signInUrl);
   }
-  // ✅ If user is logged in and tries to access /login → redirect to /
-  if (pathname === "/login" && token) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
 
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|login|manifest.webmanifest|sw.js).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js).*)",
   ],
 };

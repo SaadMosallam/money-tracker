@@ -33,11 +33,11 @@ export function validateBalanceDataset({
     participantsByExpense.set(p.expenseId, list);
   }
 
-  // Validate each unsettled expense
+  // Validate each expense
   for (const expense of expenses) {
     const list = participantsByExpense.get(expense.id);
     if (!list || list.length === 0) {
-      throw new Error(`Unsettled expense ${expense.id} has no participants`);
+      throw new Error(`Expense ${expense.id} has no participants`);
     }
 
     const totalWeight = list.reduce((sum, p) => sum + p.weight, 0);
