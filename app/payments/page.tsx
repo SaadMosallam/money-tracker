@@ -3,18 +3,47 @@ import { getUsers } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { PaymentList } from "@/components/business/payment/PaymentForm";
 import { buildUserNameById } from "@/lib/utils/userNameById";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getPaymentApprovalsByPaymentIds } from "@/lib/db/queries/approvals";
+import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 
 export default async function PaymentsPage() {
-  const [payments, users] = await Promise.all([getPayments(), getUsers()]);
+  const [payments, users, session] = await Promise.all([
+    getPayments(),
+    getUsers(),
+    getServerSession(authOptions),
+  ]);
+  const currentUserId = session?.user?.id ?? "";
   const userNameById = buildUserNameById(users);
 
-  const rows = payments.map((payment) => ({
-    id: payment.id,
-    fromName: userNameById[payment.fromUserId] ?? payment.fromUserId,
-    toName: userNameById[payment.toUserId] ?? payment.toUserId,
-    amount: payment.amount,
-    createdAt: payment.createdAt ?? null,
-  }));
+  const approvals = await getPaymentApprovalsByPaymentIds(
+    payments.map((payment) => payment.id)
+  );
+  const approvalsByPayment = new Map<string, typeof approvals>();
+  for (const approval of approvals) {
+    const list = approvalsByPayment.get(approval.paymentId) ?? [];
+    list.push(approval);
+    approvalsByPayment.set(approval.paymentId, list);
+  }
+
+  const rows = payments.map((payment) => {
+    const approvalList = approvalsByPayment.get(payment.id) ?? [];
+    const approvalStatus = computeApprovalStatus(approvalList);
+    const userApproval = approvalList.find(
+      (approval) => approval.userId === currentUserId
+    );
+
+    return {
+      id: payment.id,
+      fromName: userNameById[payment.fromUserId] ?? payment.fromUserId,
+      toName: userNameById[payment.toUserId] ?? payment.toUserId,
+      amount: payment.amount,
+      createdAt: payment.createdAt ?? null,
+      approvalStatus,
+      canApprove: userApproval?.status === "pending",
+    };
+  });
 
   return (
     <PageContainer title="Payments">

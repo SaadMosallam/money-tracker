@@ -16,6 +16,8 @@ type ExpenseRowData = {
   participantsLabel: string;
   isSettled: boolean;
   createdAt: Date | null;
+  approvalStatus: "pending" | "approved" | "rejected";
+  canApprove: boolean;
 };
 
 type ExpenseListProps = {
@@ -44,6 +46,7 @@ export function ExpenseList({
           <TableHead className="whitespace-nowrap">Paid By</TableHead>
           <TableHead>Participants</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Approval</TableHead>
           <TableHead>Created</TableHead>
           <TableHead className="whitespace-nowrap text-right">Action</TableHead>
         </TableRow>

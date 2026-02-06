@@ -6,6 +6,7 @@ import {
   boolean,
   timestamp,
   primaryKey,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 /* ================= USERS ================= */
@@ -67,3 +68,60 @@ export const payments = pgTable("payments", {
   amount: integer("amount").notNull(), // cents
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+/* ================= APPROVALS ================= */
+
+export const expenseApprovals = pgTable(
+  "expense_approvals",
+  {
+    expenseId: uuid("expense_id")
+      .notNull()
+      .references(() => expenses.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    status: varchar("status", { length: 16 }).default("pending").notNull(),
+    decidedAt: timestamp("decided_at"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.expenseId, table.userId] }),
+  })
+);
+
+export const paymentApprovals = pgTable(
+  "payment_approvals",
+  {
+    paymentId: uuid("payment_id")
+      .notNull()
+      .references(() => payments.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    status: varchar("status", { length: 16 }).default("pending").notNull(),
+    decidedAt: timestamp("decided_at"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.paymentId, table.userId] }),
+  })
+);
+
+export const approvalNotifications = pgTable(
+  "approval_notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    entityType: varchar("entity_type", { length: 16 }).notNull(),
+    entityId: uuid("entity_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    resolvedAt: timestamp("resolved_at"),
+  },
+  (table) => ({
+    unique: uniqueIndex("approval_notifications_unique").on(
+      table.userId,
+      table.entityType,
+      table.entityId
+    ),
+  })
+);

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { payments } from "@/lib/db/schema";
+import { approvalNotifications, paymentApprovals, payments } from "@/lib/db/schema";
 import { validatePaymentRows } from "@/lib/validation/rows";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -41,16 +41,42 @@ export async function createPayment(formData: FormData): Promise<void> {
     createdAt: new Date(),
   };
 
+  const approvalRows = [
+    {
+      paymentId: paymentRow.id,
+      userId: toUserId,
+      status: "pending",
+      decidedAt: null,
+    },
+  ];
+
+  const notificationRows = [
+    {
+      userId: toUserId,
+      entityType: "payment",
+      entityId: paymentRow.id,
+      resolvedAt: null,
+    },
+  ];
+
   // ---------- 2️⃣ Row-level validation ----------
   const validation = validatePaymentRows([paymentRow]);
   if (!validation.ok) {
     throw new Error(validation.errors.join(", "));
   }
   // ---------- 3️⃣ Insert ----------
-  await db.insert(payments).values(paymentRow);
+  await db.transaction(async (tx) => {
+    await tx.insert(payments).values(paymentRow);
+    await tx.insert(paymentApprovals).values(approvalRows);
+    await tx
+      .insert(approvalNotifications)
+      .values(notificationRows)
+      .onConflictDoNothing();
+  });
 
   // ---------- 4️⃣ Revalidate ----------
   revalidatePath("/");
   revalidatePath("/payments");
+  revalidatePath("/approvals");
   redirect("/");
 }
