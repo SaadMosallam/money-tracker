@@ -1,16 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { scryptSync, timingSafeEqual } from "crypto";
 import { getUserByEmail } from "@/lib/db/queries/users";
-
-const verifyPassword = (password: string, storedHash: string) => {
-  const [salt, hash] = storedHash.split(".");
-  if (!salt || !hash) return false;
-  const derived = scryptSync(password, salt, 64);
-  const hashBuffer = Buffer.from(hash, "hex");
-  if (hashBuffer.length !== derived.length) return false;
-  return timingSafeEqual(hashBuffer, derived);
-};
+import { verifyPassword } from "@/lib/auth/password";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -37,6 +28,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
+          image: null,
         };
       },
     }),
@@ -50,6 +42,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.image = user.image ?? null;
       }
       return token;
     },
@@ -58,6 +51,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
+        session.user.image = (token.image as string) ?? null;
       }
       return session;
     },

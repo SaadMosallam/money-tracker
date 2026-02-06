@@ -96,11 +96,13 @@ export function PairwiseDebts({ balances, userNameById }: PairwiseDebtsProps) {
                       name={
                         userNameById[transfer.fromUserId] ?? transfer.fromUserId
                       }
+                      showAvatar
                     />
                   </TableCell>
                   <TableCell>
                     <UserLabel
                       name={userNameById[transfer.toUserId] ?? transfer.toUserId}
+                      showAvatar
                     />
                   </TableCell>
                   <TableCell className="text-right">

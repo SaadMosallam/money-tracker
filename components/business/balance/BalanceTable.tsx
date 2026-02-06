@@ -38,7 +38,7 @@ export function BalanceTable({ rows }: BalanceTableProps) {
             {rows.map((row) => (
               <TableRow key={row.userId}>
                 <TableCell>
-                  <UserLabel name={row.name} />
+                  <UserLabel name={row.name} showAvatar />
                 </TableCell>
                 <TableCell className="text-right">
                   <Money cents={row.balance} />
