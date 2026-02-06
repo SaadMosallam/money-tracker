@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Field,
   FieldContent,
   FieldDescription,
@@ -34,6 +27,8 @@ type UserOption = {
 type ExpenseFormProps = {
   users: UserOption[];
   action: (formData: FormData) => void;
+  currentUserId: string;
+  currentUserName: string;
 };
 
 type ParticipantState = Record<
@@ -44,17 +39,20 @@ type ParticipantState = Record<
   }
 >;
 
-export function ExpenseForm({ users, action }: ExpenseFormProps) {
+export function ExpenseForm({
+  users,
+  action,
+  currentUserId,
+  currentUserName,
+}: ExpenseFormProps) {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     title?: string;
     amount?: string;
-    paidById?: string;
     participants?: string;
   }>({});
   const [amount, setAmount] = useState("");
-  const [paidById, setPaidById] = useState(users[0]?.id ?? "");
   const [participants, setParticipants] = useState<ParticipantState>(() => {
     const initial: ParticipantState = {};
     for (const user of users) {
@@ -122,13 +120,13 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
   }, [participants]);
 
   const hasUsers = users.length > 0;
+  const hasCurrentUser = Boolean(currentUserId);
   const participantsPayload = useMemo(() => {
     const amountCents = parseCurrencyToCents(amount);
     return buildParticipantsPayload(amountCents);
   }, [amount, buildParticipantsPayload]);
 
-  const paidByLabel =
-    users.find((user) => user.id === paidById)?.name ?? "Select user";
+  const paidByLabel = currentUserName || "Unknown user";
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -146,10 +144,6 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
         const nextErrors: typeof fieldErrors = {};
         if (!title) {
           nextErrors.title = "Title is required.";
-        }
-        if (!paidById) {
-          nextErrors.paidById = "Paid by is required.";
-          setErrorMessage("Please select who paid for this expense.");
         }
         const amountCents = parseCurrencyToCents(amount);
         if (!amountCents || amountCents <= 0) {
@@ -225,7 +219,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
     });
   };
 
-  if (!hasUsers) {
+  if (!hasUsers || !hasCurrentUser) {
     return (
       <Card>
         <CardHeader>
@@ -233,7 +227,9 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Add users first before creating expenses.
+            {hasUsers
+              ? "Sign in before creating expenses."
+              : "Add users first before creating expenses."}
           </p>
         </CardContent>
       </Card>
@@ -252,7 +248,7 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
             name="participants"
             value={JSON.stringify(participantsPayload)}
           />
-          <input type="hidden" name="paidById" value={paidById} />
+          <input type="hidden" name="paidById" value={currentUserId} />
           <input type="hidden" name="amount" value={parseCurrencyToCents(amount) ?? ""} />
 
           <FieldGroup>
@@ -312,52 +308,13 @@ export function ExpenseForm({ users, action }: ExpenseFormProps) {
             </Field>
 
             <Field>
-              <FieldLabel>
-                Paid By <span className="text-destructive">*</span>
-              </FieldLabel>
+              <FieldLabel>Paid By</FieldLabel>
               <FieldContent>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={`w-full justify-between cursor-pointer ${fieldErrors.paidById
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : ""
-                        }`}
-                    >
-                      {paidByLabel}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={paidById}
-                      onValueChange={(value) => {
-                        setPaidById(value);
-                        if (fieldErrors.paidById) {
-                          setFieldErrors((prev) => ({
-                            ...prev,
-                            paidById: undefined,
-                          }));
-                        }
-                      }}
-                    >
-                      {users.map((user) => (
-                        <DropdownMenuRadioItem key={user.id} value={user.id}>
-                          {user.name}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Input value={paidByLabel} readOnly />
               </FieldContent>
-              <FieldDescription>Select who paid for this expense.</FieldDescription>
-              {fieldErrors.paidById && (
-                <FieldError>{fieldErrors.paidById}</FieldError>
-              )}
+              <FieldDescription>
+                This expense will be recorded as paid by your account.
+              </FieldDescription>
             </Field>
           </FieldGroup>
 

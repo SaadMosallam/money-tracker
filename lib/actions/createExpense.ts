@@ -9,11 +9,19 @@ import {
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function createExpense(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  const sessionUserId = session?.user?.id;
+  if (!sessionUserId) {
+    throw new Error("You must be signed in to create expenses.");
+  }
+
   const title = String(formData.get("title"));
   const amount = Number(formData.get("amount"));
-  const paidById = String(formData.get("paidById"));
+  const paidById = sessionUserId;
   const participants = JSON.parse(String(formData.get("participants"))) as {
     userId: string;
     weight: number;

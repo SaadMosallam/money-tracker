@@ -31,27 +31,34 @@ type UserOption = {
 type PaymentCreateFormProps = {
   users: UserOption[];
   action: (formData: FormData) => void;
+  currentUserId: string;
+  currentUserName: string;
 };
 
-export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
+export function PaymentCreateForm({
+  users,
+  action,
+  currentUserId,
+  currentUserName,
+}: PaymentCreateFormProps) {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
-    fromUserId?: string;
     toUserId?: string;
     amount?: string;
   }>({});
   const [amount, setAmount] = useState("");
-  const [fromUserId, setFromUserId] = useState(users[0]?.id ?? "");
-  const [toUserId, setToUserId] = useState(users[1]?.id ?? users[0]?.id ?? "");
+  const [toUserId, setToUserId] = useState(
+    users.find((user) => user.id !== currentUserId)?.id ?? ""
+  );
 
   const hasUsers = users.length > 0;
-  const getAlternateUserId = (excludeId: string) =>
-    users.find((user) => user.id !== excludeId)?.id ?? "";
+  const hasCurrentUser = Boolean(currentUserId);
+  const availableRecipients = users.filter((user) => user.id !== currentUserId);
 
   const fromUserLabel = useMemo(() => {
-    return users.find((user) => user.id === fromUserId)?.name ?? "Select user";
-  }, [users, fromUserId]);
+    return currentUserName || "Unknown user";
+  }, [currentUserName]);
 
   const toUserLabel = useMemo(() => {
     return users.find((user) => user.id === toUserId)?.name ?? "Select user";
@@ -66,8 +73,7 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         setErrorMessage(null);
         setFieldErrors({});
         const nextErrors: typeof fieldErrors = {};
-        if (!fromUserId || !toUserId || fromUserId === toUserId) {
-          nextErrors.fromUserId = "From is required.";
+        if (!currentUserId || !toUserId || currentUserId === toUserId) {
           nextErrors.toUserId = "To must be different.";
           setErrorMessage("Please select two different users.");
         }
@@ -96,7 +102,7 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
     });
   };
 
-  if (!hasUsers) {
+  if (!hasUsers || !hasCurrentUser) {
     return (
       <Card>
         <CardHeader>
@@ -104,7 +110,23 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Add users first before creating payments.
+            {hasUsers
+              ? "Sign in before creating payments."
+              : "Add users first before creating payments."}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (availableRecipients.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>New Payment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Add at least one other user before creating payments.
           </p>
         </CardContent>
       </Card>
@@ -118,7 +140,7 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <input type="hidden" name="fromUserId" value={fromUserId} />
+          <input type="hidden" name="fromUserId" value={currentUserId} />
           <input type="hidden" name="toUserId" value={toUserId} />
           <input type="hidden" name="amount" value={parseCurrencyToCents(amount) ?? ""} />
 
@@ -128,55 +150,9 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                 From <span className="text-destructive">*</span>
               </FieldLabel>
               <FieldContent>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={`w-full justify-between cursor-pointer ${fieldErrors.fromUserId
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : ""
-                        }`}
-                    >
-                      {fromUserLabel}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={fromUserId}
-                      onValueChange={(value) => {
-                        setFromUserId(value);
-                        if (fieldErrors.fromUserId) {
-                          setFieldErrors((prev) => ({
-                            ...prev,
-                            fromUserId: undefined,
-                          }));
-                        }
-                        if (value === toUserId) {
-                          setToUserId(getAlternateUserId(value));
-                        }
-                      }}
-                    >
-                      {users.map((user) => (
-                        <DropdownMenuRadioItem
-                          key={user.id}
-                          value={user.id}
-                          disabled={user.id === toUserId}
-                        >
-                          {user.name}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Input value={fromUserLabel} readOnly />
               </FieldContent>
               <FieldDescription>Who paid the money.</FieldDescription>
-              {fieldErrors.fromUserId && (
-                <FieldError>{fieldErrors.fromUserId}</FieldError>
-              )}
             </Field>
 
             <Field>
@@ -211,16 +187,12 @@ export function PaymentCreateForm({ users, action }: PaymentCreateFormProps) {
                             toUserId: undefined,
                           }));
                         }
-                        if (value === fromUserId) {
-                          setFromUserId(getAlternateUserId(value));
-                        }
                       }}
                     >
-                      {users.map((user) => (
+                      {availableRecipients.map((user) => (
                         <DropdownMenuRadioItem
                           key={user.id}
                           value={user.id}
-                          disabled={user.id === fromUserId}
                         >
                           {user.name}
                         </DropdownMenuRadioItem>
