@@ -9,10 +9,13 @@ import {
   PlusCircle,
   Receipt,
   BanknoteArrowUp,
+  User,
   LogIn,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getUserInitials } from "@/lib/utils/userInitials";
 
 type NavItem = {
   href: string;
@@ -37,6 +40,12 @@ const navItems: NavItem[] = [
     mobileLabel: "Payment",
     icon: <BanknoteArrowUp className="h-4 w-4" />,
   },
+  {
+    href: "/account",
+    label: "Account",
+    mobileLabel: "Account",
+    icon: <User className="h-4 w-4" />,
+  },
 ];
 
 const isActive = (pathname: string, href: string) => {
@@ -49,6 +58,8 @@ export function AppNav() {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const displayName = session?.user?.name ?? session?.user?.email ?? "Account";
+  const displayImage = session?.user?.image ?? null;
+  const displayInitials = getUserInitials(displayName);
   const authActionClassName =
     "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60 cursor-pointer";
   const authActionClassNameMobile =
@@ -69,7 +80,7 @@ export function AppNav() {
             Money Tracker
           </Link>
         )}
-        {!isLoginPage &&
+          {!isLoginPage &&
           (isAuthenticated ? (
             <button
               type="button"
@@ -130,7 +141,15 @@ export function AppNav() {
               </nav>
               <div className="flex items-center justify-end gap-2 text-sm">
                 {isAuthenticated && (
-                  <span className="text-foreground">Hi, {displayName}</span>
+                  <span className="flex items-center gap-2 text-foreground">
+                    <Avatar className="h-7 w-7">
+                      {displayImage ? (
+                        <AvatarImage src={displayImage} alt={displayName} />
+                      ) : null}
+                      <AvatarFallback>{displayInitials}</AvatarFallback>
+                    </Avatar>
+                    Hi, {displayName}
+                  </span>
                 )}
                 {isAuthenticated ? (
                   <button
@@ -155,7 +174,7 @@ export function AppNav() {
 
       {!isLoginPage && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-          <div className="grid grid-cols-5">
+          <div className="grid grid-cols-6">
             {navItems.map((item) => {
               const active = isActive(pathname, item.href);
               return (

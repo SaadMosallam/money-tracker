@@ -15,3 +15,12 @@ export const getUserByEmail = async (email: string) => {
     .limit(1);
   return user ?? null;
 };
+
+export const getUserById = async (id: string) => {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+  return user ?? null;
+};
