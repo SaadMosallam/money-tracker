@@ -5,7 +5,6 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUserInitials } from "@/lib/utils/userInitials";
-import { upload } from "@vercel/blob/client";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +46,7 @@ export function UserProfileForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isAvatarPending, setIsAvatarPending] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? null);
   const avatarFormRef = useRef<HTMLFormElement | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
@@ -160,20 +160,54 @@ export function UserProfileForm({
                           if (!file) return;
                           setAvatarError(null);
                           setIsAvatarPending(true);
+                          setUploadProgress(0);
                           const controller = new AbortController();
                           avatarAbortRef.current = controller;
                           try {
-                            const blob = await upload(
-                              `avatars/${user.id}/${file.name}`,
-                              file,
-                              {
-                                access: "public",
-                                handleUploadUrl: "/api/avatar/upload",
-                                abortSignal: controller.signal,
+                            const uploadResult = await new Promise<{ url: string }>(
+                              (resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open("POST", "/api/avatar/upload-file", true);
+                                xhr.responseType = "json";
+
+                                xhr.upload.onprogress = (progress) => {
+                                  if (progress.lengthComputable) {
+                                    const percent = Math.round(
+                                      (progress.loaded / progress.total) * 100
+                                    );
+                                    // Keep some room for server-side processing.
+                                    setUploadProgress(Math.min(percent, 95));
+                                  }
+                                };
+
+                                xhr.onload = () => {
+                                  if (xhr.status >= 200 && xhr.status < 300) {
+                                    setUploadProgress(100);
+                                    resolve(xhr.response as { url: string });
+                                  } else {
+                                    reject(
+                                      new Error(
+                                        (xhr.response as { error?: string })?.error ??
+                                          "Upload failed."
+                                      )
+                                    );
+                                  }
+                                };
+
+                                xhr.onerror = () => reject(new Error("Upload failed."));
+                                xhr.onabort = () => reject(new Error("aborted"));
+
+                                const data = new FormData();
+                                data.append("avatar", file);
+                                xhr.send(data);
+
+                                controller.signal.addEventListener("abort", () => {
+                                  xhr.abort();
+                                });
                               }
                             );
 
-                            const result = await setAvatarAction(blob.url);
+                            const result = await setAvatarAction(uploadResult.url);
                             setAvatarUrl(result.avatarUrl ?? null);
                             if (update) {
                               await update({ image: result.avatarUrl ?? null });
@@ -194,6 +228,7 @@ export function UserProfileForm({
                             }
                           } finally {
                             setIsAvatarPending(false);
+                            setUploadProgress(null);
                             avatarAbortRef.current = null;
                             if (avatarInputRef.current) {
                               avatarInputRef.current.value = "";
@@ -253,11 +288,16 @@ export function UserProfileForm({
                   Remove Avatar
                 </Button>
               </div>
-              {isAvatarPending && (
+              {uploadProgress !== null && (
                 <div className="flex items-center gap-2">
                   <progress
                     className="h-2 w-full overflow-hidden rounded-full"
+                    value={uploadProgress ?? 0}
+                    max={100}
                   />
+                  <span className="text-xs text-muted-foreground">
+                    {uploadProgress}%
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"
