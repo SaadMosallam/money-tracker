@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
 import {
   ArrowRightLeft,
   LayoutDashboard,
@@ -10,6 +11,8 @@ import {
   Receipt,
   BanknoteArrowUp,
   User,
+  Sun,
+  Moon,
   LogIn,
   LogOut,
 } from "lucide-react";
@@ -64,6 +67,7 @@ export function AppNav() {
   const displayImage = session?.user?.image ?? null;
   const displayInitials = getUserInitials(displayName);
   const [approvalCount, setApprovalCount] = useState(0);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (!isAuthenticated || isLoginPage) return;
@@ -190,6 +194,21 @@ export function AppNav() {
                 })}
               </nav>
               <div className="flex items-center justify-end gap-2 text-sm">
+                <button
+                  type="button"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className={cn(
+                    "rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60 cursor-pointer",
+                    isAuthenticated ? "mr-1" : ""
+                  )}
+                  aria-label="Toggle theme"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )}
+                </button>
                 {isAuthenticated && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
