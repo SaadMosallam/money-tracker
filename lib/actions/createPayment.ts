@@ -6,9 +6,17 @@ import { validatePaymentRows } from "@/lib/validation/rows";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function createPayment(formData: FormData): Promise<void> {
-  const fromUserId = String(formData.get("fromUserId"));
+  const session = await getServerSession(authOptions);
+  const sessionUserId = session?.user?.id;
+  if (!sessionUserId) {
+    throw new Error("You must be signed in to create payments.");
+  }
+
+  const fromUserId = sessionUserId;
   const toUserId = String(formData.get("toUserId"));
   const amount = Number(formData.get("amount"));
 
