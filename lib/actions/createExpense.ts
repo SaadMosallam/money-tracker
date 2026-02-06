@@ -1,7 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { expenses, expenseParticipants } from "@/lib/db/schema";
+import {
+  approvalNotifications,
+  expenseApprovals,
+  expenseParticipants,
+  expenses,
+} from "@/lib/db/schema";
 import {
   validateExpenseRows,
   validateExpenseParticipantRows,
@@ -58,6 +63,24 @@ export async function createExpense(formData: FormData) {
     weight: p.weight,
   }));
 
+  const approverIds = Array.from(
+    new Set(participantRows.map((p) => p.userId))
+  ).filter((userId) => userId !== paidById);
+
+  const approvalRows = approverIds.map((userId) => ({
+    expenseId,
+    userId,
+    status: "pending",
+    decidedAt: null,
+  }));
+
+  const notificationRows = approverIds.map((userId) => ({
+    userId,
+    entityType: "expense",
+    entityId: expenseId,
+    resolvedAt: null,
+  }));
+
   // ---------- 3️⃣ Row-level validation (reuse your existing validators) ----------
   const expenseValidation = validateExpenseRows([expenseRow]);
   if (!expenseValidation.ok) {
@@ -73,10 +96,20 @@ export async function createExpense(formData: FormData) {
   await db.transaction(async (tx) => {
     await tx.insert(expenses).values(expenseRow);
     await tx.insert(expenseParticipants).values(participantRows);
+    if (approvalRows.length > 0) {
+      await tx.insert(expenseApprovals).values(approvalRows);
+    }
+    if (notificationRows.length > 0) {
+      await tx
+        .insert(approvalNotifications)
+        .values(notificationRows)
+        .onConflictDoNothing();
+    }
   });
 
   // ---------- 5️⃣ Revalidate dashboard ----------
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/approvals");
   redirect("/");
 }

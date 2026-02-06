@@ -227,6 +227,7 @@ export function UserProfileForm({
                     setAvatarError(null);
                     avatarInputRef.current?.click();
                   }}
+                  className="cursor-pointer"
                 >
                   {isAvatarPending ? "Uploading..." : "Upload Avatar"}
                 </Button>
@@ -258,6 +259,7 @@ export function UserProfileForm({
                     })();
                   }}
                   disabled={isAvatarPending || !avatarUrl}
+                  className="cursor-pointer"
                 >
                   Remove Avatar
                 </Button>
@@ -286,105 +288,113 @@ export function UserProfileForm({
             </FieldSet>
           </form>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
             <FieldSet>
               <FieldGroup>
                 <Field>
                   <FieldLabel>Name</FieldLabel>
-                <FieldContent>
-                  <Input
-                    name="name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className={
-                      fieldErrors.name
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : undefined
-                    }
-                  />
-                </FieldContent>
-                {fieldErrors.name && <FieldError>{fieldErrors.name}</FieldError>}
-              </Field>
-              <Field>
-                <FieldLabel>Email</FieldLabel>
-                <FieldContent>
-                  <Input value={user.email} readOnly />
-                </FieldContent>
-                <FieldDescription>Email cannot be changed.</FieldDescription>
-              </Field>
-            </FieldGroup>
-          </FieldSet>
+                  <FieldContent>
+                    <Input
+                      name="name"
+                      value={name}
+                      readOnly
+                      onChange={(event) => setName(event.target.value)}
+                      className={
+                        fieldErrors.name
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : undefined
+                      }
+                    />
+                  </FieldContent>
+                  {fieldErrors.name && <FieldError>{fieldErrors.name}</FieldError>}
+                </Field>
+                <Field>
+                  <FieldLabel>Email</FieldLabel>
+                  <FieldContent>
+                    <Input value={user.email} readOnly />
+                  </FieldContent>
+                  <FieldDescription>Email cannot be changed.</FieldDescription>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </div>
 
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel>Current Password</FieldLabel>
-                <FieldContent>
-                  <Input
-                    name="currentPassword"
-                    type="password"
-                    autoComplete="current-password"
-                    value={currentPassword}
-                    onChange={(event) => setCurrentPassword(event.target.value)}
-                    className={
-                      fieldErrors.currentPassword
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : undefined
-                    }
-                  />
-                </FieldContent>
-                {fieldErrors.currentPassword && (
-                  <FieldError>{fieldErrors.currentPassword}</FieldError>
-                )}
-              </Field>
-              <Field>
-                <FieldLabel>New Password</FieldLabel>
-                <FieldContent>
-                  <Input
-                    name="newPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={newPassword}
-                    onChange={(event) => setNewPassword(event.target.value)}
-                    className={
-                      fieldErrors.newPassword
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : undefined
-                    }
-                  />
-                </FieldContent>
-                {fieldErrors.newPassword && (
-                  <FieldError>{fieldErrors.newPassword}</FieldError>
-                )}
-              </Field>
-              <Field>
-                <FieldLabel>Confirm New Password</FieldLabel>
-                <FieldContent>
-                  <Input
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    className={
-                      fieldErrors.confirmPassword
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : undefined
-                    }
-                  />
-                </FieldContent>
-                {fieldErrors.confirmPassword && (
-                  <FieldError>{fieldErrors.confirmPassword}</FieldError>
-                )}
-              </Field>
-            </FieldGroup>
-            <FieldDescription>
-              Leave password fields blank to keep your current password.
-            </FieldDescription>
-          </FieldSet>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <input type="hidden" name="name" value={name} />
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel>Current Password</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      name="currentPassword"
+                      type="password"
+                      autoComplete="current-password"
+                      value={currentPassword}
+                      onChange={(event) => setCurrentPassword(event.target.value)}
+                      className={
+                        fieldErrors.currentPassword
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : undefined
+                      }
+                    />
+                  </FieldContent>
+                  {fieldErrors.currentPassword && (
+                    <FieldError>{fieldErrors.currentPassword}</FieldError>
+                  )}
+                </Field>
+                <Field>
+                  <FieldLabel>New Password</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      name="newPassword"
+                      type="password"
+                      autoComplete="new-password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      className={
+                        fieldErrors.newPassword
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : undefined
+                      }
+                    />
+                  </FieldContent>
+                  {fieldErrors.newPassword && (
+                    <FieldError>{fieldErrors.newPassword}</FieldError>
+                  )}
+                </Field>
+                <Field>
+                  <FieldLabel>Confirm New Password</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      name="confirmPassword"
+                      type="password"
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      className={
+                        fieldErrors.confirmPassword
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : undefined
+                      }
+                    />
+                  </FieldContent>
+                  {fieldErrors.confirmPassword && (
+                    <FieldError>{fieldErrors.confirmPassword}</FieldError>
+                  )}
+                </Field>
+              </FieldGroup>
+              <FieldDescription>
+                Leave password fields blank to keep your current password.
+              </FieldDescription>
+            </FieldSet>
 
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="cursor-pointer"
+            >
+              {isPending ? "Saving..." : "Update Password"}
             </Button>
 
             {errorMessage && <FieldError>{errorMessage}</FieldError>}

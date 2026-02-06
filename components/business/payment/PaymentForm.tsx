@@ -14,6 +14,8 @@ type PaymentRowData = {
   toName: string;
   amount: number;
   createdAt: Date | null;
+  approvalStatus: "pending" | "approved" | "rejected";
+  canApprove: boolean;
 };
 
 type PaymentListProps = {
@@ -38,7 +40,9 @@ export function PaymentList({ rows }: PaymentListProps) {
                 <TableHead className="whitespace-nowrap">From</TableHead>
                 <TableHead className="whitespace-nowrap">To</TableHead>
                 <TableHead className="whitespace-nowrap">Amount</TableHead>
+                <TableHead className="whitespace-nowrap">Approval</TableHead>
                 <TableHead className="whitespace-nowrap">Created</TableHead>
+                <TableHead className="whitespace-nowrap text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -3,13 +3,29 @@ import { getUsers } from "@/lib/db/queries/users";
 import { ExpenseList } from "@/components/business/expense/ExpenseList";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { buildUserNameById } from "@/lib/utils/userNameById";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getExpenseApprovalsByExpenseIds } from "@/lib/db/queries/approvals";
+import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 
 export default async function ExpensesPage() {
-  const [expenses, participants, users] = await Promise.all([
+  const [expenses, participants, users, session] = await Promise.all([
     getExpenses(),
     getExpenseParticipants(),
     getUsers(),
+    getServerSession(authOptions),
   ]);
+  const currentUserId = session?.user?.id ?? "";
+
+  const approvals = await getExpenseApprovalsByExpenseIds(
+    expenses.map((expense) => expense.id)
+  );
+  const approvalsByExpense = new Map<string, typeof approvals>();
+  for (const approval of approvals) {
+    const list = approvalsByExpense.get(approval.expenseId) ?? [];
+    list.push(approval);
+    approvalsByExpense.set(approval.expenseId, list);
+  }
 
   const userNameById = buildUserNameById(users);
 
@@ -49,6 +65,12 @@ export default async function ExpensesPage() {
           })
           .join(", ");
 
+    const approvalList = approvalsByExpense.get(expense.id) ?? [];
+    const approvalStatus = computeApprovalStatus(approvalList);
+    const userApproval = approvalList.find(
+      (approval) => approval.userId === currentUserId
+    );
+
     return {
       id: expense.id,
       title: expense.title,
@@ -57,6 +79,8 @@ export default async function ExpensesPage() {
       participantsLabel,
       isSettled: expense.isSettled,
       createdAt: expense.createdAt ?? null,
+      approvalStatus,
+      canApprove: userApproval?.status === "pending",
     };
   });
 
