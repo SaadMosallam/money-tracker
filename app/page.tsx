@@ -3,16 +3,17 @@ import { getUsers } from "@/lib/db/queries/users";
 
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { BalanceTable, PairwiseDebts } from "@/components/business/balance";
-import { buildUserNameById } from "@/lib/utils/userNameById";
+import { buildUserById } from "@/lib/utils/userById";
 
 export default async function Home() {
   const [balances, users] = await Promise.all([getBalances(), getUsers()]);
 
-  const userNameById = buildUserNameById(users);
+  const userById = buildUserById(users);
 
   const balanceRows = Object.entries(balances).map(([userId, balance]) => ({
     userId,
-    name: userNameById[userId] ?? userId,
+    name: userById[userId]?.name ?? userId,
+    imageUrl: userById[userId]?.avatarUrl ?? null,
     balance,
   }));
 
@@ -20,7 +21,7 @@ export default async function Home() {
     <PageContainer title="Dashboard">
       <div className="space-y-8">
         <BalanceTable rows={balanceRows} />
-        <PairwiseDebts balances={balances} userNameById={userNameById} />
+        <PairwiseDebts balances={balances} userById={userById} />
       </div>
     </PageContainer>
   );

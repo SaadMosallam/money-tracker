@@ -5,6 +5,10 @@ import { getUserById } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { UserProfileForm } from "@/components/business/account/UserProfileForm";
 import { updateUserProfile } from "@/lib/actions/updateUserProfile";
+import {
+  setUserAvatarUrl,
+  deleteUserAvatar,
+} from "@/lib/actions/updateUserAvatar";
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions);
@@ -20,8 +24,15 @@ export default async function AccountPage() {
   return (
     <PageContainer title="Account" maxWidthClassName="max-w-2xl">
       <UserProfileForm
-        user={{ name: user.name, email: user.email }}
+        user={{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+        }}
         action={updateUserProfile}
+        setAvatarAction={setUserAvatarUrl}
+        deleteAvatarAction={deleteUserAvatar}
       />
     </PageContainer>
   );

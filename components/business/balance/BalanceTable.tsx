@@ -13,6 +13,7 @@ import { UserLabel } from "@/components/business/primitives/UserLabel";
 type BalanceRow = {
   userId: string;
   name: string;
+  imageUrl?: string | null;
   balance: number;
 };
 
@@ -38,7 +39,11 @@ export function BalanceTable({ rows }: BalanceTableProps) {
             {rows.map((row) => (
               <TableRow key={row.userId}>
                 <TableCell>
-                  <UserLabel name={row.name} showAvatar />
+                  <UserLabel
+                    name={row.name}
+                    imageUrl={row.imageUrl ?? null}
+                    showAvatar
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <Money cents={row.balance} />
