@@ -47,7 +47,6 @@ export function UserProfileForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isAvatarPending, setIsAvatarPending] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? null);
   const avatarFormRef = useRef<HTMLFormElement | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
@@ -161,7 +160,6 @@ export function UserProfileForm({
                           if (!file) return;
                           setAvatarError(null);
                           setIsAvatarPending(true);
-                          setUploadProgress(0);
                           const controller = new AbortController();
                           avatarAbortRef.current = controller;
                           try {
@@ -172,14 +170,6 @@ export function UserProfileForm({
                                 access: "public",
                                 handleUploadUrl: "/api/avatar/upload",
                                 abortSignal: controller.signal,
-                                onUploadProgress: (progress) => {
-                                  if (progress.total > 0) {
-                                    const percent = Math.round(
-                                      (progress.loaded / progress.total) * 100
-                                    );
-                                    setUploadProgress(percent);
-                                  }
-                                },
                               }
                             );
 
@@ -204,7 +194,6 @@ export function UserProfileForm({
                             }
                           } finally {
                             setIsAvatarPending(false);
-                            setUploadProgress(null);
                             avatarAbortRef.current = null;
                             if (avatarInputRef.current) {
                               avatarInputRef.current.value = "";
@@ -264,12 +253,10 @@ export function UserProfileForm({
                   Remove Avatar
                 </Button>
               </div>
-              {uploadProgress !== null && (
+              {isAvatarPending && (
                 <div className="flex items-center gap-2">
                   <progress
                     className="h-2 w-full overflow-hidden rounded-full"
-                    value={uploadProgress}
-                    max={100}
                   />
                   <Button
                     type="button"

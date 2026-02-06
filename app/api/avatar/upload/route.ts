@@ -30,6 +30,9 @@ export async function POST(request: Request) {
           addRandomSuffix: true,
         };
       },
+      onUploadCompleted: async () => {
+        // Client handles saving the URL; nothing to do here.
+      },
     });
 
     return NextResponse.json(jsonResponse);
