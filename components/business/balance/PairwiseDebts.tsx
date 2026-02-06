@@ -19,7 +19,14 @@ type PairwiseDebt = {
 
 type PairwiseDebtsProps = {
   balances: BalanceByUserId;
-  userNameById: Record<string, string>;
+  userById: Record<
+    string,
+    {
+      id: string;
+      name: string;
+      avatarUrl?: string | null;
+    }
+  >;
 };
 
 const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
@@ -64,7 +71,7 @@ const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
   return transfers;
 };
 
-export function PairwiseDebts({ balances, userNameById }: PairwiseDebtsProps) {
+export function PairwiseDebts({ balances, userById }: PairwiseDebtsProps) {
   const transfers = buildPairwiseDebts(balances);
 
   return (
@@ -93,15 +100,15 @@ export function PairwiseDebts({ balances, userNameById }: PairwiseDebtsProps) {
                 >
                   <TableCell>
                     <UserLabel
-                      name={
-                        userNameById[transfer.fromUserId] ?? transfer.fromUserId
-                      }
+                      name={userById[transfer.fromUserId]?.name ?? transfer.fromUserId}
+                      imageUrl={userById[transfer.fromUserId]?.avatarUrl ?? null}
                       showAvatar
                     />
                   </TableCell>
                   <TableCell>
                     <UserLabel
-                      name={userNameById[transfer.toUserId] ?? transfer.toUserId}
+                      name={userById[transfer.toUserId]?.name ?? transfer.toUserId}
+                      imageUrl={userById[transfer.toUserId]?.avatarUrl ?? null}
                       showAvatar
                     />
                   </TableCell>
