@@ -19,7 +19,7 @@ export function UserLabel({
   const initials = getUserInitials(name);
 
   return (
-    <span className="flex items-center gap-2 font-medium">
+    <span className="flex items-center gap-2 font-medium whitespace-nowrap">
       <Avatar className="h-7 w-7">
         {imageUrl ? <AvatarImage src={imageUrl} alt={name} /> : null}
         <AvatarFallback>{initials}</AvatarFallback>

@@ -88,9 +88,9 @@ export function PairwiseDebts({ balances, userById }: PairwiseDebtsProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="whitespace-nowrap">From</TableHead>
+                <TableHead className="whitespace-nowrap">To</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,14 +98,14 @@ export function PairwiseDebts({ balances, userById }: PairwiseDebtsProps) {
                 <TableRow
                   key={`${transfer.fromUserId}-${transfer.toUserId}-${index}`}
                 >
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <UserLabel
                       name={userById[transfer.fromUserId]?.name ?? transfer.fromUserId}
                       imageUrl={userById[transfer.fromUserId]?.avatarUrl ?? null}
                       showAvatar
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <UserLabel
                       name={userById[transfer.toUserId]?.name ?? transfer.toUserId}
                       imageUrl={userById[transfer.toUserId]?.avatarUrl ?? null}

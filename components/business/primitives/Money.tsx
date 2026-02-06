@@ -14,8 +14,9 @@ export function Money({ cents }: MoneyProps) {
         : "text-foreground";
 
   return (
-    <span className={cn("font-mono tabular-nums", tone)}>
-      {value} <span className="text-xs text-muted-foreground">EGP</span>
+    <span className={cn("inline-flex items-baseline gap-1 font-mono tabular-nums whitespace-nowrap", tone)}>
+      {value}
+      <span className="text-xs text-muted-foreground">EGP</span>
     </span>
   );
 }
