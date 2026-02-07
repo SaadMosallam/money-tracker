@@ -95,6 +95,7 @@ export default async function ExpensesPage({ params }: ExpensesPageProps) {
           title={t.unsettledExpenses}
           emptyMessage={t.noUnsettledExpenses}
           t={t}
+          locale={locale}
         />
 
         <details className="rounded-xl border bg-card text-card-foreground shadow">
@@ -114,6 +115,7 @@ export default async function ExpensesPage({ params }: ExpensesPageProps) {
                 variant="plain"
                 showTitle={false}
                 t={t}
+                locale={locale}
               />
             )}
           </div>

@@ -25,6 +25,7 @@ type ExpenseRowProps = {
   approvalStatus: "pending" | "approved" | "rejected";
   canApprove: boolean;
   t: Dictionary;
+  locale: string;
 };
 
 export function ExpenseRow({
@@ -38,6 +39,7 @@ export function ExpenseRow({
   approvalStatus,
   canApprove,
   t,
+  locale,
 }: ExpenseRowProps) {
   const approvalBadge =
     approvalStatus === "approved"
@@ -102,7 +104,7 @@ export function ExpenseRow({
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        {createdAt ? formatDateTime(createdAt) : "—"}
+        {createdAt ? formatDateTime(createdAt, locale) : "—"}
       </TableCell>
       <TableCell className="whitespace-nowrap text-left">
         {canApprove ? (

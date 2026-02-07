@@ -1,5 +1,6 @@
-export const formatDateTime = (date: Date) => {
-  const formatted = new Intl.DateTimeFormat("en-GB", {
+export const formatDateTime = (date: Date, locale: string = "en") => {
+  const localeTag = locale === "ar" ? "ar-EG" : "en-GB";
+  const formatted = new Intl.DateTimeFormat(localeTag, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

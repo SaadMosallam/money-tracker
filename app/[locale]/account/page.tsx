@@ -12,12 +12,11 @@ import {
 import ApprovalsPanel from "@/components/business/account/ApprovalsPanel";
 import { ApprovalsClientWrapper } from "@/components/business/account/ApprovalsClientWrapper";
 import Link from "next/link";
-import { cn } from "@/lib/utils/cn";
 import { db } from "@/lib/db";
 import { approvalNotifications } from "@/lib/db/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { getDictionary, Locale } from "@/lib/i18n";
-import { Languages } from "lucide-react";
+import { AccountTabsBar } from "@/components/business/account/AccountTabsBar";
 
 type AccountPageProps = {
   params: Promise<{ locale: Locale }>;
@@ -65,50 +64,14 @@ export default async function AccountPage({
   return (
     <PageContainer title={t.account} maxWidthClassName="max-w-6xl">
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={`/${locale}/account`}
-            className={cn(
-              "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-              activeTab === "profile"
-                ? "bg-foreground text-background"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            )}
-          >
-            {t.profile}
-          </Link>
-          <Link
-            href={`/${locale}/account?tab=approvals`}
-            className={cn(
-              "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-              activeTab === "approvals"
-                ? "bg-foreground text-background"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            )}
-          >
-            <span className="flex items-center gap-2">
-              {t.approvals}
-              {approvalCount > 0 && (
-                <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
-                  {approvalCount}
-                </span>
-              )}
-            </span>
-          </Link>
-          <button
-            type="button"
-            aria-label={switchLocaleLabel}
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                window.location.assign(switchLocaleHref);
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground cursor-pointer"
-          >
-            <Languages className="h-4 w-4" />
-            {switchLocaleLabel}
-          </button>
-        </div>
+        <AccountTabsBar
+          locale={locale}
+          activeTab={activeTab}
+          approvalCount={approvalCount}
+          switchLocaleHref={switchLocaleHref}
+          switchLocaleLabel={switchLocaleLabel}
+          t={t}
+        />
 
         {activeTab === "approvals" ? (
           <ApprovalsClientWrapper>

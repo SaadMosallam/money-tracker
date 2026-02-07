@@ -49,12 +49,47 @@ export default async function PaymentsPage({ params }: PaymentsPageProps) {
       createdAt: payment.createdAt ?? null,
       approvalStatus,
       canApprove: userApproval?.status === "pending",
+      isSettled: payment.isSettled,
     };
   });
 
+  const unsettledRows = rows.filter((row) => !row.isSettled);
+  const settledRows = rows.filter((row) => row.isSettled);
+
   return (
     <PageContainer title={t.payments}>
-      <PaymentList rows={rows} t={t} />
+      <div className="space-y-6">
+        <PaymentList
+          rows={unsettledRows}
+          t={t}
+          locale={locale}
+          title={t.unsettledPayments}
+          emptyMessage={t.noUnsettledPayments}
+        />
+
+        <details className="rounded-xl border bg-card text-card-foreground shadow">
+          <summary className="cursor-pointer select-none px-6 py-4 text-sm font-semibold">
+            {t.settledPayments} ({settledRows.length})
+          </summary>
+          <div className="px-6 pb-6">
+            {settledRows.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                {t.noSettledPayments}
+              </div>
+            ) : (
+              <PaymentList
+                rows={settledRows}
+                t={t}
+                locale={locale}
+                title={t.settledPayments}
+                emptyMessage={t.noSettledPayments}
+                variant="plain"
+                showTitle={false}
+              />
+            )}
+          </div>
+        </details>
+      </div>
     </PageContainer>
   );
 }

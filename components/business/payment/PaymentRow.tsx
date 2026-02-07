@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { approvePayment, rejectPayment } from "@/lib/actions/approvals";
 import { Dictionary } from "@/lib/i18n";
+import { markPaymentSettled } from "@/lib/actions/markPaymentSettled";
 
 type PaymentRowProps = {
   id: string;
@@ -15,7 +16,9 @@ type PaymentRowProps = {
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";
   canApprove: boolean;
+  isSettled: boolean;
   t: Dictionary;
+  locale: string;
 };
 
 export function PaymentRow({
@@ -26,7 +29,9 @@ export function PaymentRow({
   createdAt,
   approvalStatus,
   canApprove,
+  isSettled,
   t,
+  locale,
 }: PaymentRowProps) {
   const approvalBadge =
     approvalStatus === "approved"
@@ -58,7 +63,7 @@ export function PaymentRow({
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        {createdAt ? formatDateTime(createdAt) : "—"}
+        {createdAt ? formatDateTime(createdAt, locale) : "—"}
       </TableCell>
       <TableCell className="whitespace-nowrap text-left">
         {canApprove ? (
@@ -81,6 +86,20 @@ export function PaymentRow({
               </Button>
             </form>
           </div>
+        ) : isSettled ? (
+          <span className="text-sm text-muted-foreground">{t.settled}</span>
+        ) : approvalStatus !== "pending" ? (
+          <form action={markPaymentSettled}>
+            <input type="hidden" name="paymentId" value={id} />
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+            >
+              {t.markSettled}
+            </Button>
+          </form>
         ) : (
           <span className="text-sm text-muted-foreground">—</span>
         )}

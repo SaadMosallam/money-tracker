@@ -67,6 +67,7 @@ export const payments = pgTable("payments", {
 
   amount: integer("amount").notNull(), // cents
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  isSettled: boolean("is_settled").default(false).notNull(),
 });
 
 /* ================= APPROVALS ================= */

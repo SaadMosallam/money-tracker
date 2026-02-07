@@ -32,6 +32,7 @@ type ExpenseListProps = {
   variant?: "card" | "plain";
   showTitle?: boolean;
   t: Dictionary;
+  locale: string;
 };
 
 export function ExpenseList({
@@ -41,6 +42,7 @@ export function ExpenseList({
   variant = "card",
   showTitle = true,
   t,
+  locale,
 }: ExpenseListProps) {
   const resolvedTitle = title ?? t.allExpenses;
   const resolvedEmptyMessage = emptyMessage ?? t.noExpensesYet;
@@ -66,7 +68,7 @@ export function ExpenseList({
       </TableHeader>
       <TableBody>
         {rows.map((row) => (
-          <ExpenseRow key={row.id} {...row} t={t} />
+          <ExpenseRow key={row.id} {...row} t={t} locale={locale} />
         ))}
       </TableBody>
     </Table>

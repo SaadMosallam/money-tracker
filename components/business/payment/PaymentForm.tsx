@@ -17,48 +17,76 @@ type PaymentRowData = {
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";
   canApprove: boolean;
+  isSettled: boolean;
 };
 
 type PaymentListProps = {
   rows: PaymentRowData[];
   t: Dictionary;
+  locale: string;
+  title?: string;
+  emptyMessage?: string;
+  variant?: "card" | "plain";
+  showTitle?: boolean;
 };
 
-export function PaymentList({ rows, t }: PaymentListProps) {
+export function PaymentList({
+  rows,
+  t,
+  locale,
+  title,
+  emptyMessage,
+  variant = "card",
+  showTitle = true,
+}: PaymentListProps) {
+  const resolvedTitle = title ?? t.allPayments;
+  const resolvedEmpty = emptyMessage ?? t.noPaymentsYet;
+  const content =
+    rows.length === 0 ? (
+      <div className="text-sm text-muted-foreground">{resolvedEmpty}</div>
+    ) : (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">{t.from}</TableHead>
+            <TableHead className="whitespace-nowrap">{t.to}</TableHead>
+            <TableHead className="whitespace-nowrap">
+              {t.amount} ({t.egp})
+            </TableHead>
+            <TableHead className="whitespace-nowrap">{t.approval}</TableHead>
+            <TableHead className="whitespace-nowrap">{t.created}</TableHead>
+            <TableHead className="whitespace-nowrap text-left">
+              {t.action}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => (
+            <PaymentRow key={row.id} {...row} t={t} locale={locale} />
+          ))}
+        </TableBody>
+      </Table>
+    );
+
+  if (variant === "plain") {
+    return (
+      <div className="space-y-4">
+        {showTitle && (
+          <h3 className="text-lg font-semibold">{resolvedTitle}</h3>
+        )}
+        {content}
+      </div>
+    );
+  }
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t.allPayments}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {rows.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            {t.noPaymentsYet}
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="whitespace-nowrap">{t.from}</TableHead>
-                <TableHead className="whitespace-nowrap">{t.to}</TableHead>
-                <TableHead className="whitespace-nowrap">
-                  {t.amount} ({t.egp})
-                </TableHead>
-                <TableHead className="whitespace-nowrap">{t.approval}</TableHead>
-                <TableHead className="whitespace-nowrap">{t.created}</TableHead>
-                <TableHead className="whitespace-nowrap text-left">
-                  {t.action}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row) => (
-                <PaymentRow key={row.id} {...row} t={t} />
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
+      {showTitle && (
+        <CardHeader>
+          <CardTitle>{resolvedTitle}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>{content}</CardContent>
     </Card>
   );
 }

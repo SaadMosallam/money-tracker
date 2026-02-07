@@ -3,14 +3,18 @@ import { Locale, rtlLocales } from "@/lib/i18n";
 
 type LocaleLayoutProps = {
   children: ReactNode;
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 };
 
-export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
-  const dir = rtlLocales.includes(params.locale) ? "rtl" : "ltr";
+export default async function LocaleLayout({
+  children,
+  params,
+}: LocaleLayoutProps) {
+  const { locale } = await params;
+  const dir = rtlLocales.includes(locale) ? "rtl" : "ltr";
 
   return (
-    <div dir={dir} lang={params.locale} className="min-h-screen">
+    <div dir={dir} lang={locale} className="min-h-screen">
       {children}
     </div>
   );

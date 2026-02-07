@@ -195,7 +195,7 @@ export default async function ApprovalsPanel({
                       <Badge variant="outline">{t.pending}</Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                      {row.createdAt ? formatDateTime(row.createdAt) : "—"}
+                      {row.createdAt ? formatDateTime(row.createdAt, locale) : "—"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-left">
                       <div className="flex justify-end gap-2">
@@ -265,7 +265,7 @@ export default async function ApprovalsPanel({
                       <Badge variant="outline">{t.pending}</Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                      {row.createdAt ? formatDateTime(row.createdAt) : "—"}
+                      {row.createdAt ? formatDateTime(row.createdAt, locale) : "—"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-left">
                       <div className="flex justify-end gap-2">
