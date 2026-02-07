@@ -47,7 +47,9 @@ export function ExpenseList({
       <TableHeader>
         <TableRow>
           <TableHead>{t.title}</TableHead>
-          <TableHead>{t.amount}</TableHead>
+          <TableHead>
+            {t.amount} ({t.egp})
+          </TableHead>
           <TableHead className="whitespace-nowrap">{t.paidBy}</TableHead>
           <TableHead>{t.participants}</TableHead>
           <TableHead>{t.status}</TableHead>

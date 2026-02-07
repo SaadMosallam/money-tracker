@@ -34,7 +34,9 @@ export function BalanceTable({ rows, t }: BalanceTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>{t.user}</TableHead>
-              <TableHead className="text-end">{t.balance}</TableHead>
+              <TableHead className="text-end">
+                {t.balance} ({t.egp})
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

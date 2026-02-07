@@ -41,7 +41,9 @@ export function PaymentList({ rows, t }: PaymentListProps) {
               <TableRow>
                 <TableHead className="whitespace-nowrap">{t.from}</TableHead>
                 <TableHead className="whitespace-nowrap">{t.to}</TableHead>
-                <TableHead className="whitespace-nowrap">{t.amount}</TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t.amount} ({t.egp})
+                </TableHead>
                 <TableHead className="whitespace-nowrap">{t.approval}</TableHead>
                 <TableHead className="whitespace-nowrap">{t.created}</TableHead>
                 <TableHead className="whitespace-nowrap text-end">

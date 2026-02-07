@@ -93,7 +93,7 @@ export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
                 <TableHead className="whitespace-nowrap">{t.from}</TableHead>
                 <TableHead className="whitespace-nowrap">{t.to}</TableHead>
                 <TableHead className="text-end whitespace-nowrap">
-                  {t.amount}
+                  {t.amount} ({t.egp})
                 </TableHead>
               </TableRow>
             </TableHeader>

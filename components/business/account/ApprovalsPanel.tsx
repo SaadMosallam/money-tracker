@@ -166,7 +166,9 @@ export default async function ApprovalsPanel({
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.title}</TableHead>
-                  <TableHead>{t.amount}</TableHead>
+                  <TableHead>
+                    {t.amount} ({t.egp})
+                  </TableHead>
                   <TableHead>{t.paidBy}</TableHead>
                   <TableHead>{t.participants}</TableHead>
                   <TableHead>{t.status}</TableHead>
@@ -239,7 +241,9 @@ export default async function ApprovalsPanel({
                 <TableRow>
                   <TableHead>{t.from}</TableHead>
                   <TableHead>{t.to}</TableHead>
-                  <TableHead>{t.amount}</TableHead>
+                  <TableHead>
+                    {t.amount} ({t.egp})
+                  </TableHead>
                   <TableHead>{t.status}</TableHead>
                   <TableHead>{t.created}</TableHead>
                   <TableHead className="text-end">{t.action}</TableHead>
