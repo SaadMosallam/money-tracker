@@ -13,18 +13,22 @@ export function UserLabel({
   showAvatar = false,
 }: UserLabelProps) {
   if (!showAvatar) {
-    return <span className="font-medium">{name}</span>;
+    return (
+      <span className="max-w-[160px] truncate font-medium" title={name}>
+        {name}
+      </span>
+    );
   }
 
   const initials = getUserInitials(name);
 
   return (
-    <span className="flex items-center gap-2 font-medium whitespace-nowrap">
+    <span className="flex items-center gap-2 font-medium whitespace-nowrap" title={name}>
       <Avatar className="h-7 w-7">
         {imageUrl ? <AvatarImage src={imageUrl} alt={name} /> : null}
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
-      <span>{name}</span>
+      <span className="max-w-[140px] truncate">{name}</span>
     </span>
   );
 }

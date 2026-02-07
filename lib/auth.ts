@@ -1,6 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getUserByEmail } from "@/lib/db/queries/users";
+import { getUserByLogin } from "@/lib/db/queries/users";
 import { verifyPassword } from "@/lib/auth/password";
 
 export const authOptions: NextAuthOptions = {
@@ -11,7 +11,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email or username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password ?? "";
         if (!email || !password) return null;
 
-        const user = await getUserByEmail(email);
+        const user = await getUserByLogin(email);
         if (!user || !verifyPassword(password, user.passwordHash)) {
           return null;
         }

@@ -186,7 +186,9 @@ export default async function ApprovalsPanel({
                       <Money cents={row.amount} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {row.paidByName}
+                      <span className="max-w-[160px] truncate" title={row.paidByName}>
+                        {row.paidByName}
+                      </span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.participantsLabel}
@@ -253,10 +255,14 @@ export default async function ApprovalsPanel({
                 {paymentRows.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="whitespace-nowrap">
-                      {row.fromName}
+                      <span className="max-w-[160px] truncate" title={row.fromName}>
+                        {row.fromName}
+                      </span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {row.toName}
+                      <span className="max-w-[160px] truncate" title={row.toName}>
+                        {row.toName}
+                      </span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <Money cents={row.amount} />

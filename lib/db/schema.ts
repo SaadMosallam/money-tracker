@@ -70,6 +70,25 @@ export const payments = pgTable("payments", {
   isSettled: boolean("is_settled").default(false).notNull(),
 });
 
+/* ================= PASSWORD RESETS ================= */
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 128 }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userTokenIdx: index("password_reset_user_idx").on(table.userId),
+  })
+);
+
 /* ================= APPROVALS ================= */
 
 export const expenseApprovals = pgTable(

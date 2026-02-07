@@ -237,7 +237,7 @@ export function AppNav() {
                             </span>
                           )}
                         </span>
-                        <span>
+                        <span className="max-w-[160px] truncate" title={displayName}>
                           {t.hi}, {displayName}
                         </span>
                       </button>

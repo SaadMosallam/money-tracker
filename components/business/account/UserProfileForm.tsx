@@ -60,6 +60,7 @@ export function UserProfileForm({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState(user.email);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
@@ -83,6 +84,9 @@ export function UserProfileForm({
         if (!name.trim()) {
           nextErrors.name = t.nameRequired;
         }
+        if (!email.trim()) {
+          nextErrors.name = t.emailAndPasswordRequired;
+        }
         if (newPassword || confirmPassword) {
           if (!currentPassword) {
             nextErrors.currentPassword = t.currentPasswordRequired;
@@ -104,6 +108,7 @@ export function UserProfileForm({
         }
 
         formData.set("name", name.trim());
+        formData.set("email", email.trim().toLowerCase());
         const result = await action(formData);
 
         if (result?.passwordChanged) {
@@ -112,8 +117,8 @@ export function UserProfileForm({
           return;
         }
 
-        if (result?.name && update) {
-          await update({ name: result.name });
+        if (update) {
+          await update({ name: result.name, email: result.email });
         }
 
         setCurrentPassword("");
@@ -342,7 +347,11 @@ export function UserProfileForm({
                 <Field>
                   <FieldLabel>{t.emailLabel}</FieldLabel>
                   <FieldContent>
-                    <Input value={user.email} readOnly />
+                    <Input
+                      name="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                    />
                   </FieldContent>
                   <FieldDescription>{t.emailCannotBeChanged}</FieldDescription>
                 </Field>

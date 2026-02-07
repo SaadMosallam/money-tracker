@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Dictionary } from "@/lib/i18n";
+import Link from "next/link";
 
 type LoginFormProps = {
   locale: string;
@@ -73,7 +74,7 @@ export function LoginForm({ locale, t }: LoginFormProps) {
           <FieldSet>
             <FieldGroup>
               <Field>
-                <FieldLabel>{t.emailLabel}</FieldLabel>
+                <FieldLabel>{t.emailOrUsername}</FieldLabel>
                 <FieldContent>
                   <Input
                     name="email"
@@ -81,7 +82,7 @@ export function LoginForm({ locale, t }: LoginFormProps) {
                     autoComplete="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder={t.emailPlaceholder}
+                    placeholder={t.emailOrUsernamePlaceholder}
                   />
                 </FieldContent>
               </Field>
@@ -112,6 +113,14 @@ export function LoginForm({ locale, t }: LoginFormProps) {
           >
             {isPending ? t.signingIn : t.signInTitle}
           </Button>
+          <div className="text-center">
+            <Link
+              href={`/${locale}/forgot-password`}
+              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+            >
+              {t.forgotPassword}
+            </Link>
+          </div>
         </form>
       </CardContent>
     </Card>

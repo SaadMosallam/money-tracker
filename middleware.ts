@@ -48,6 +48,12 @@ export async function middleware(request: NextRequest) {
     return res;
   }
 
+  if (pathname === `/${locale}/forgot-password` || pathname === `/${locale}/reset-password`) {
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.cookies.set("NEXT_LOCALE", locale);
+    return res;
+  }
+
   if (!token) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = `/${locale}/login`;

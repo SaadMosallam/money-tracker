@@ -2,11 +2,12 @@
 
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { revalidatePath } from "next/cache";
+import { isValidEmail } from "@/lib/validation/email";
 
 export async function updateUserProfile(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -16,11 +17,16 @@ export async function updateUserProfile(formData: FormData) {
   }
 
   const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
 
   if (!name) {
     throw new Error("Name is required.");
+  }
+
+  if (!email || !isValidEmail(email)) {
+    throw new Error("Email is invalid.");
   }
 
   const [user] = await db
@@ -33,7 +39,7 @@ export async function updateUserProfile(formData: FormData) {
     throw new Error("User not found.");
   }
 
-  const updates: Partial<typeof users.$inferInsert> = { name };
+  const updates: Partial<typeof users.$inferInsert> = { name, email };
   let passwordChanged = false;
 
   if (newPassword) {
@@ -53,10 +59,19 @@ export async function updateUserProfile(formData: FormData) {
     passwordChanged = true;
   }
 
+  const [emailExists] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, email), ne(users.id, sessionUserId)))
+    .limit(1);
+  if (emailExists) {
+    throw new Error("Email is already in use.");
+  }
+
   await db.update(users).set(updates).where(eq(users.id, sessionUserId));
 
   revalidatePath("/account");
   revalidatePath("/");
 
-  return { name, passwordChanged };
+  return { name, email, passwordChanged };
 }
