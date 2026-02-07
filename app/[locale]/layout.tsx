@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { Locale, rtlLocales } from "@/lib/i18n";
+import { rtlLocales } from "@/lib/i18n";
 
 type LocaleLayoutProps = {
   children: ReactNode;
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
 };
 
 export default async function LocaleLayout({
