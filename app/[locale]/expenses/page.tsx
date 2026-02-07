@@ -52,25 +52,18 @@ export default async function ExpensesPage({ params }: ExpensesPageProps) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
-    const participantsLabel =
-      list.length === 0
-        ? "—"
-        : hasEqualShares
-          ? list
-            .map((p) => userNameById[p.userId] ?? p.userId)
-            .join(", ")
-          : list
-            .map((p) => {
-              const name = userNameById[p.userId] ?? p.userId;
-              const percent =
-                totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
-              const percentLabel =
-                percent > 0 && percent < 0.01
-                  ? "<0.01%"
-                  : `${percentFormatter.format(percent)}%`;
-              return `${name} (${percentLabel})`;
-            })
-            .join(", ");
+    const participants = list.map((p) => {
+      const name = userNameById[p.userId] ?? p.userId;
+      const percent =
+        totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
+      const percentLabel =
+        percent > 0 && percent < 0.01
+          ? "<0.01%"
+          : `${percentFormatter.format(percent)}%`;
+      const label = hasEqualShares ? name : `${name} (${percentLabel})`;
+      const avatarUrl = users.find((u) => u.id === p.userId)?.avatarUrl ?? null;
+      return { name, imageUrl: avatarUrl, label };
+    });
 
     const approvalList = approvalsByExpense.get(expense.id) ?? [];
     const approvalStatus = computeApprovalStatus(approvalList);
@@ -83,7 +76,7 @@ export default async function ExpensesPage({ params }: ExpensesPageProps) {
       title: expense.title,
       amount: expense.amount,
       paidByName: userNameById[expense.paidById] ?? expense.paidById,
-      participantsLabel,
+      participants,
       isSettled: expense.isSettled,
       createdAt: expense.createdAt ?? null,
       approvalStatus,

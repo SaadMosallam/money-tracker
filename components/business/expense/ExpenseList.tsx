@@ -14,7 +14,11 @@ type ExpenseRowData = {
   title: string;
   amount: number;
   paidByName: string;
-  participantsLabel: string;
+  participants: Array<{
+    name: string;
+    imageUrl?: string | null;
+    label: string;
+  }>;
   isSettled: boolean;
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";

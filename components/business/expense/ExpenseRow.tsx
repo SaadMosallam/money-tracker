@@ -5,6 +5,8 @@ import { markSettled } from "@/lib/actions/markSettled";
 import { approveExpense, rejectExpense } from "@/lib/actions/approvals";
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getUserInitials } from "@/lib/utils/userInitials";
 import { formatDateTime } from "@/lib/utils/date";
 import { Dictionary } from "@/lib/i18n";
 
@@ -13,7 +15,11 @@ type ExpenseRowProps = {
   title: string;
   amount: number;
   paidByName: string;
-  participantsLabel: string;
+  participants: Array<{
+    name: string;
+    imageUrl?: string | null;
+    label: string;
+  }>;
   isSettled: boolean;
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";
@@ -26,7 +32,7 @@ export function ExpenseRow({
   title,
   amount,
   paidByName,
-  participantsLabel,
+  participants,
   isSettled,
   createdAt,
   approvalStatus,
@@ -51,7 +57,32 @@ export function ExpenseRow({
         <UserLabel name={paidByName} />
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        {participantsLabel}
+        {participants.length === 0 ? (
+          "—"
+        ) : (
+          <div className="flex items-center gap-1">
+            {participants.map((participant) => {
+              const initials = getUserInitials(participant.name);
+              return (
+                <span
+                  key={participant.label}
+                  title={participant.label}
+                  className="inline-flex"
+                >
+                  <Avatar className="h-7 w-7">
+                    {participant.imageUrl ? (
+                      <AvatarImage
+                        src={participant.imageUrl}
+                        alt={participant.name}
+                      />
+                    ) : null}
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                </span>
+              );
+            })}
+          </div>
+        )}
       </TableCell>
       <TableCell className="whitespace-nowrap">
         <Badge variant={isSettled ? "secondary" : "outline"}>
