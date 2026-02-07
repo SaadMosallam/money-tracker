@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { getUserById } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { UserProfileForm } from "@/components/business/account/UserProfileForm";
-import { updateUserProfile } from "@/lib/actions/updateUserProfile";
+import {
+  updateUserInfo,
+  updateUserPassword,
+} from "@/lib/actions/updateUserProfile";
 import {
   setUserAvatarUrl,
   deleteUserAvatar,
@@ -87,7 +90,8 @@ export default async function AccountPage({
             }}
             locale={locale}
             t={t}
-            action={updateUserProfile}
+            updateProfileAction={updateUserInfo}
+            updatePasswordAction={updateUserPassword}
             setAvatarAction={setUserAvatarUrl}
             deleteAvatarAction={deleteUserAvatar}
           />

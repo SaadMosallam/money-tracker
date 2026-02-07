@@ -31,8 +31,11 @@ type UserProfileFormProps = {
   };
   locale: string;
   t: Dictionary;
-  action: (formData: FormData) => Promise<{
+  updateProfileAction: (formData: FormData) => Promise<{
     name: string;
+    email: string;
+  }>;
+  updatePasswordAction: (formData: FormData) => Promise<{
     passwordChanged: boolean;
   }>;
   setAvatarAction: (avatarUrl: string) => Promise<{ avatarUrl: string | null }>;
@@ -43,13 +46,15 @@ export function UserProfileForm({
   user,
   locale,
   t,
-  action,
+  updateProfileAction,
+  updatePasswordAction,
   setAvatarAction,
   deleteAvatarAction,
 }: UserProfileFormProps) {
   const { update } = useSession();
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isProfilePending, startProfileTransition] = useTransition();
+  const [isPasswordPending, startPasswordTransition] = useTransition();
   const [isAvatarPending, setIsAvatarPending] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? null);
@@ -65,17 +70,18 @@ export function UserProfileForm({
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
+    email?: string;
     currentPassword?: string;
     newPassword?: string;
     confirmPassword?: string;
   }>({});
   const initials = getUserInitials(name || user.email);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    startTransition(async () => {
+    startProfileTransition(async () => {
       try {
         setErrorMessage(null);
         setFieldErrors({});
@@ -85,21 +91,7 @@ export function UserProfileForm({
           nextErrors.name = t.nameRequired;
         }
         if (!email.trim()) {
-          nextErrors.name = t.emailAndPasswordRequired;
-        }
-        if (newPassword || confirmPassword) {
-          if (!currentPassword) {
-            nextErrors.currentPassword = t.currentPasswordRequired;
-          }
-          if (currentPassword && newPassword && currentPassword === newPassword) {
-            nextErrors.newPassword = t.newPasswordDifferent;
-          }
-          if (newPassword.length < 8) {
-            nextErrors.newPassword = t.newPasswordMin;
-          }
-          if (newPassword !== confirmPassword) {
-            nextErrors.confirmPassword = t.passwordsDoNotMatch;
-          }
+          nextErrors.email = t.emailInvalid;
         }
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
@@ -109,21 +101,12 @@ export function UserProfileForm({
 
         formData.set("name", name.trim());
         formData.set("email", email.trim().toLowerCase());
-        const result = await action(formData);
-
-        if (result?.passwordChanged) {
-          toast.success(t.passwordUpdatedSignInAgain);
-          await signOut({ callbackUrl: `/${locale}/login` });
-          return;
-        }
+        const result = await updateProfileAction(formData);
 
         if (update) {
           await update({ name: result.name, email: result.email });
         }
 
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
         toast.success(t.profileUpdated);
         router.push(`/${locale}`);
       } catch (error) {
@@ -132,19 +115,92 @@ export function UserProfileForm({
           return;
         }
         console.error(error);
-        setErrorMessage(t.somethingWentWrong);
-        toast.error(t.somethingWentWrong);
+        const message = error instanceof Error ? error.message : t.somethingWentWrong;
+        if (message === "Email is invalid.") {
+          setFieldErrors((prev) => ({ ...prev, email: t.emailInvalid }));
+        }
+        if (message === "Email is already in use.") {
+          setFieldErrors((prev) => ({ ...prev, email: t.emailInUse }));
+        }
+        setErrorMessage(
+          message === "Email is invalid."
+            ? t.emailInvalid
+            : message === "Email is already in use."
+              ? t.emailInUse
+              : message
+        );
+        toast.error(
+          message === "Email is invalid."
+            ? t.emailInvalid
+            : message === "Email is already in use."
+              ? t.emailInUse
+              : message
+        );
+      }
+    });
+  };
+
+  const handlePasswordSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    startPasswordTransition(async () => {
+      try {
+        setErrorMessage(null);
+        setFieldErrors({});
+
+        const nextErrors: typeof fieldErrors = {};
+        if (!currentPassword) {
+          nextErrors.currentPassword = t.currentPasswordRequired;
+        }
+        if (!newPassword) {
+          nextErrors.newPassword = t.newPasswordMin;
+        } else {
+          if (currentPassword && currentPassword === newPassword) {
+            nextErrors.newPassword = t.newPasswordDifferent;
+          }
+          if (newPassword.length < 8) {
+            nextErrors.newPassword = t.newPasswordMin;
+          }
+        }
+        if (newPassword !== confirmPassword) {
+          nextErrors.confirmPassword = t.passwordsDoNotMatch;
+        }
+        if (Object.keys(nextErrors).length > 0) {
+          setFieldErrors(nextErrors);
+          toast.error(t.fixHighlightedFields);
+          return;
+        }
+
+        formData.set("currentPassword", currentPassword);
+        formData.set("newPassword", newPassword);
+        formData.set("confirmPassword", confirmPassword);
+        const result = await updatePasswordAction(formData);
+        if (result?.passwordChanged) {
+          toast.success(t.passwordUpdatedSignInAgain);
+          await signOut({ callbackUrl: `/${locale}/login` });
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+        const message = error instanceof Error ? error.message : t.somethingWentWrong;
+        setErrorMessage(message);
+        toast.error(message);
+      } finally {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
       }
     });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t.accountSettings}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.avatar}</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form ref={avatarFormRef} className="space-y-4">
             <FieldSet>
               <FieldGroup>
@@ -247,9 +303,7 @@ export function UserProfileForm({
                       />
                     </div>
                   </FieldContent>
-                  <FieldDescription>
-                    {t.uploadImageHelp}
-                  </FieldDescription>
+                  <FieldDescription>{t.uploadImageHelp}</FieldDescription>
                 </Field>
               </FieldGroup>
               <div className="flex items-center gap-2">
@@ -323,8 +377,15 @@ export function UserProfileForm({
               {avatarError && <FieldError>{avatarError}</FieldError>}
             </FieldSet>
           </form>
+        </CardContent>
+      </Card>
 
-          <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.profile}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleProfileSubmit} className="space-y-4">
             <FieldSet>
               <FieldGroup>
                 <Field>
@@ -333,7 +394,6 @@ export function UserProfileForm({
                     <Input
                       name="name"
                       value={name}
-                      readOnly
                       onChange={(event) => setName(event.target.value)}
                       className={
                         fieldErrors.name
@@ -351,16 +411,35 @@ export function UserProfileForm({
                       name="email"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
+                      className={
+                        fieldErrors.email
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : undefined
+                      }
                     />
                   </FieldContent>
                   <FieldDescription>{t.emailCannotBeChanged}</FieldDescription>
+                  {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
                 </Field>
               </FieldGroup>
             </FieldSet>
-          </div>
+            <Button
+              type="submit"
+              disabled={isProfilePending}
+              className="cursor-pointer"
+            >
+              {isProfilePending ? t.saving : t.updateProfile}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <input type="hidden" name="name" value={name} />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.updatePassword}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordSubmit} className="space-y-6">
             <FieldSet>
               <FieldGroup>
                 <Field>
@@ -424,23 +503,21 @@ export function UserProfileForm({
                   )}
                 </Field>
               </FieldGroup>
-              <FieldDescription>
-                {t.leavePasswordBlank}
-              </FieldDescription>
+              <FieldDescription>{t.leavePasswordBlank}</FieldDescription>
             </FieldSet>
 
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPasswordPending}
               className="cursor-pointer"
             >
-              {isPending ? t.saving : t.updatePassword}
+              {isPasswordPending ? t.saving : t.updatePassword}
             </Button>
 
             {errorMessage && <FieldError>{errorMessage}</FieldError>}
           </form>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
