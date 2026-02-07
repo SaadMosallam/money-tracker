@@ -10,6 +10,7 @@ import {
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
 import type { BalanceByUserId } from "@/lib/types/expensesTypes";
+import { Dictionary } from "@/lib/i18n";
 
 type PairwiseDebt = {
   fromUserId: string;
@@ -27,6 +28,7 @@ type PairwiseDebtsProps = {
       avatarUrl?: string | null;
     }
   >;
+  t: Dictionary;
 };
 
 const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
@@ -71,26 +73,28 @@ const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
   return transfers;
 };
 
-export function PairwiseDebts({ balances, userById }: PairwiseDebtsProps) {
+export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
   const transfers = buildPairwiseDebts(balances);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pairwise Debts</CardTitle>
+        <CardTitle>{t.pairwiseDebts}</CardTitle>
       </CardHeader>
       <CardContent>
         {transfers.length === 0 ? (
           <div className="text-sm text-muted-foreground">
-            Everyone is settled up.
+            {t.everyoneSettledUp}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap">From</TableHead>
-                <TableHead className="whitespace-nowrap">To</TableHead>
-                <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
+                <TableHead className="whitespace-nowrap">{t.from}</TableHead>
+                <TableHead className="whitespace-nowrap">{t.to}</TableHead>
+                <TableHead className="text-end whitespace-nowrap">
+                  {t.amount}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -112,7 +116,7 @@ export function PairwiseDebts({ balances, userById }: PairwiseDebtsProps) {
                       showAvatar
                     />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Money cents={transfer.amount} />
                   </TableCell>
                 </TableRow>

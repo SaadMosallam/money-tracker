@@ -132,3 +132,8 @@
     background-attachment: fixed;
   }
 }
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right !important;
+}

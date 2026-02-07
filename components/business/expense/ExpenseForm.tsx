@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { parseCurrencyToCents, sanitizeCurrencyInput } from "@/lib/utils/currency";
 import { isNextRedirect } from "@/lib/utils/isRedirectError";
+import { Dictionary } from "@/lib/i18n";
 
 type UserOption = {
   id: string;
@@ -29,6 +30,8 @@ type ExpenseFormProps = {
   action: (formData: FormData) => void;
   currentUserId: string;
   currentUserName: string;
+  locale: string;
+  t: Dictionary;
 };
 
 type ParticipantState = Record<
@@ -44,6 +47,8 @@ export function ExpenseForm({
   action,
   currentUserId,
   currentUserName,
+  locale,
+  t,
 }: ExpenseFormProps) {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -126,7 +131,7 @@ export function ExpenseForm({
     return buildParticipantsPayload(amountCents);
   }, [amount, buildParticipantsPayload]);
 
-  const paidByLabel = currentUserName || "Unknown user";
+  const paidByLabel = currentUserName || t.unknownUser;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -143,19 +148,19 @@ export function ExpenseForm({
 
         const nextErrors: typeof fieldErrors = {};
         if (!title) {
-          nextErrors.title = "Title is required.";
+          nextErrors.title = t.expenseTitleRequired;
         }
         const amountCents = parseCurrencyToCents(amount);
         if (!amountCents || amountCents <= 0) {
-          nextErrors.amount = "Amount is required.";
-          setErrorMessage("Please enter a valid amount.");
+          nextErrors.amount = t.expenseAmountRequired;
+          setErrorMessage(t.enterValidAmount);
         }
         if (selectedCount === 0) {
-          nextErrors.participants = "Select at least one participant.";
+          nextErrors.participants = t.selectAtLeastOneParticipant;
         }
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
-          toast.error("Please fix the highlighted fields.");
+          toast.error(t.fixHighlightedFields);
           return;
         }
         if (!amountCents) {
@@ -169,10 +174,10 @@ export function ExpenseForm({
         if (invalidShare) {
           setFieldErrors((prev) => ({
             ...prev,
-            participants: "Participant shares must be valid amounts.",
+            participants: t.participantSharesInvalid,
           }));
-          setErrorMessage("Participant shares must be valid amounts.");
-          toast.error("Participant shares must be valid amounts.");
+          setErrorMessage(t.participantSharesInvalid);
+          toast.error(t.participantSharesInvalid);
           return;
         }
 
@@ -186,35 +191,35 @@ export function ExpenseForm({
         if (computedTotal < validAmountCents) {
           setFieldErrors((prev) => ({
             ...prev,
-            participants: "Allocated shares are less than the total amount.",
+            participants: t.allocatedLess,
           }));
-          setErrorMessage("Allocated shares are less than the total amount.");
-          toast.error("Allocated shares are less than the total amount.");
+          setErrorMessage(t.allocatedLess);
+          toast.error(t.allocatedLess);
           return;
         }
         if (computedTotal > validAmountCents) {
           setFieldErrors((prev) => ({
             ...prev,
-            participants: "Allocated shares exceed the total amount.",
+            participants: t.allocatedMore,
           }));
-          setErrorMessage("Allocated shares exceed the total amount.");
-          toast.error("Allocated shares exceed the total amount.");
+          setErrorMessage(t.allocatedMore);
+          toast.error(t.allocatedMore);
           return;
         }
 
         formData.set("participants", JSON.stringify(computedParticipants));
         formData.set("amount", String(validAmountCents));
         await action(formData);
-        toast.success("Expense added successfully.");
+        toast.success(t.expenseAdded);
       } catch (error) {
         if (isNextRedirect(error)) {
-          toast.success("Expense added successfully.");
+          toast.success(t.expenseAdded);
           return;
         }
         console.error(error);
         setFieldErrors({});
-        setErrorMessage("Something went wrong. Please try again.");
-        toast.error("Something went wrong. Please try again.");
+        setErrorMessage(t.somethingWentWrong);
+        toast.error(t.somethingWentWrong);
       }
     });
   };
@@ -223,13 +228,13 @@ export function ExpenseForm({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>New Expense</CardTitle>
+          <CardTitle>{t.newExpenseTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
             {hasUsers
-              ? "Sign in before creating expenses."
-              : "Add users first before creating expenses."}
+              ? t.signInBeforeCreatingExpenses
+              : t.addUsersBeforeCreatingExpenses}
           </p>
         </CardContent>
       </Card>
@@ -239,7 +244,7 @@ export function ExpenseForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>New Expense</CardTitle>
+        <CardTitle>{t.newExpenseTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -248,19 +253,20 @@ export function ExpenseForm({
             name="participants"
             value={JSON.stringify(participantsPayload)}
           />
+          <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="paidById" value={currentUserId} />
           <input type="hidden" name="amount" value={parseCurrencyToCents(amount) ?? ""} />
 
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="title">
-                Title <span className="text-destructive">*</span>
+                {t.title} <span className="text-destructive">*</span>
               </FieldLabel>
               <FieldContent>
                 <Input
                   id="title"
                   name="title"
-                  placeholder="Dinner"
+                  placeholder={t.dinnerPlaceholder}
                   className={
                     fieldErrors.title
                       ? "border-destructive focus-visible:ring-destructive"
@@ -278,14 +284,14 @@ export function ExpenseForm({
 
             <Field>
               <FieldLabel htmlFor="amount">
-                Amount (EGP) <span className="text-destructive">*</span>
+                {t.amountLabel} <span className="text-destructive">*</span>
               </FieldLabel>
               <FieldContent>
                 <Input
                   id="amount"
                   type="text"
                   inputMode="decimal"
-                  placeholder="100.00"
+                  placeholder={t.amountPlaceholder}
                   value={amount}
                   onChange={(event) => {
                     setAmount(sanitizeCurrencyInput(event.target.value));
@@ -303,24 +309,24 @@ export function ExpenseForm({
                   }
                 />
               </FieldContent>
-              <FieldDescription>Up to 2 decimals (e.g. 125.50).</FieldDescription>
+              <FieldDescription>{t.amountHelp}</FieldDescription>
               {fieldErrors.amount && <FieldError>{fieldErrors.amount}</FieldError>}
             </Field>
 
             <Field>
-              <FieldLabel>Paid By</FieldLabel>
+              <FieldLabel>{t.paidByLabel}</FieldLabel>
               <FieldContent>
                 <Input value={paidByLabel} readOnly />
               </FieldContent>
               <FieldDescription>
-                This expense will be recorded as paid by your account.
+                {t.paidByHelp}
               </FieldDescription>
             </Field>
           </FieldGroup>
 
           <FieldSet>
             <FieldLegend>
-              Participants <span className="text-destructive">*</span>
+              {t.participantsLabel} <span className="text-destructive">*</span>
             </FieldLegend>
             <FieldGroup className="flex align-center justify-center">
               {users.map((user) => {
@@ -357,7 +363,7 @@ export function ExpenseForm({
                         type="text"
                         inputMode="decimal"
                         className="w-24"
-                        placeholder="Share"
+                        placeholder={t.participantSharePlaceholder}
                         value={state?.share ?? ""}
                         onChange={(event) => {
                           setParticipants((prev) => ({
@@ -382,8 +388,7 @@ export function ExpenseForm({
               })}
             </FieldGroup>
             <FieldDescription>
-              Optional: enter exact share amounts (EGP). Blank splits the
-              remaining amount equally.
+              {t.participantsHelp}
             </FieldDescription>
             {fieldErrors.participants && (
               <FieldError>{fieldErrors.participants}</FieldError>
@@ -391,7 +396,7 @@ export function ExpenseForm({
           </FieldSet>
 
           <Button type="submit" disabled={isPending} className="cursor-pointer">
-            {isPending ? "Creating..." : "Create Expense"}
+            {isPending ? t.creating : t.createExpense}
           </Button>
 
           {errorMessage && <FieldError>{errorMessage}</FieldError>}

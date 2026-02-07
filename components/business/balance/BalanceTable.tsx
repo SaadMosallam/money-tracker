@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
+import { Dictionary } from "@/lib/i18n";
 
 type BalanceRow = {
   userId: string;
@@ -19,20 +20,21 @@ type BalanceRow = {
 
 type BalanceTableProps = {
   rows: BalanceRow[];
+  t: Dictionary;
 };
 
-export function BalanceTable({ rows }: BalanceTableProps) {
+export function BalanceTable({ rows, t }: BalanceTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Balances</CardTitle>
+        <CardTitle>{t.balances}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
+              <TableHead>{t.user}</TableHead>
+              <TableHead className="text-end">{t.balance}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -45,7 +47,7 @@ export function BalanceTable({ rows }: BalanceTableProps) {
                     showAvatar
                   />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-end">
                   <Money cents={row.balance} />
                 </TableCell>
               </TableRow>

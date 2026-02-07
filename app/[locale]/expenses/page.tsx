@@ -3,12 +3,19 @@ import { getUsers } from "@/lib/db/queries/users";
 import { ExpenseList } from "@/components/business/expense/ExpenseList";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { buildUserNameById } from "@/lib/utils/userNameById";
+import { getDictionary, Locale } from "@/lib/i18n";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getExpenseApprovalsByExpenseIds } from "@/lib/db/queries/approvals";
 import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 
-export default async function ExpensesPage() {
+type ExpensesPageProps = {
+  params: Promise<{ locale: Locale }>;
+};
+
+export default async function ExpensesPage({ params }: ExpensesPageProps) {
+  const { locale } = await params;
+  const t = getDictionary(locale);
   const [expenses, participants, users, session] = await Promise.all([
     getExpenses(),
     getExpenseParticipants(),
@@ -49,21 +56,21 @@ export default async function ExpensesPage() {
       list.length === 0
         ? "—"
         : hasEqualShares
-        ? list
+          ? list
             .map((p) => userNameById[p.userId] ?? p.userId)
             .join(", ")
-        : list
-          .map((p) => {
-            const name = userNameById[p.userId] ?? p.userId;
-            const percent =
-              totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
-            const percentLabel =
-              percent > 0 && percent < 0.01
-                ? "<0.01%"
-                : `${percentFormatter.format(percent)}%`;
-            return `${name} (${percentLabel})`;
-          })
-          .join(", ");
+          : list
+            .map((p) => {
+              const name = userNameById[p.userId] ?? p.userId;
+              const percent =
+                totalWeight > 0 ? (p.weight / totalWeight) * 100 : 0;
+              const percentLabel =
+                percent > 0 && percent < 0.01
+                  ? "<0.01%"
+                  : `${percentFormatter.format(percent)}%`;
+              return `${name} (${percentLabel})`;
+            })
+            .join(", ");
 
     const approvalList = approvalsByExpense.get(expense.id) ?? [];
     const approvalStatus = computeApprovalStatus(approvalList);
@@ -88,30 +95,32 @@ export default async function ExpensesPage() {
   const settledRows = rows.filter((row) => row.isSettled);
 
   return (
-    <PageContainer title="Expenses" maxWidthClassName="max-w-6xl">
+    <PageContainer title={t.expenses} maxWidthClassName="max-w-6xl">
       <div className="space-y-6">
         <ExpenseList
           rows={unsettledRows}
-          title="Unsettled Expenses"
-          emptyMessage="No unsettled expenses."
+          title={t.unsettledExpenses}
+          emptyMessage={t.noUnsettledExpenses}
+          t={t}
         />
 
         <details className="rounded-xl border bg-card text-card-foreground shadow">
           <summary className="cursor-pointer select-none px-6 py-4 text-sm font-semibold">
-            Settled Expenses ({settledRows.length})
+            {t.settledExpenses} ({settledRows.length})
           </summary>
           <div className="px-6 pb-6">
             {settledRows.length === 0 ? (
               <div className="text-sm text-muted-foreground">
-                No settled expenses yet.
+                {t.noSettledExpenses}
               </div>
             ) : (
               <ExpenseList
                 rows={settledRows}
-                title="Settled Expenses"
-                emptyMessage="No settled expenses yet."
+                title={t.settledExpenses}
+                emptyMessage={t.noSettledExpenses}
                 variant="plain"
                 showTitle={false}
+                t={t}
               />
             )}
           </div>

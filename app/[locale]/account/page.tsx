@@ -16,8 +16,11 @@ import { cn } from "@/lib/utils/cn";
 import { db } from "@/lib/db";
 import { approvalNotifications } from "@/lib/db/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
+import { getDictionary, Locale } from "@/lib/i18n";
+import { Languages } from "lucide-react";
 
 type AccountPageProps = {
+  params: Promise<{ locale: Locale }>;
   searchParams?: Promise<{
     tab?: string;
   }>;
@@ -25,18 +28,22 @@ type AccountPageProps = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountPage({ searchParams }: AccountPageProps) {
+export default async function AccountPage({
+  params,
+  searchParams,
+}: AccountPageProps) {
+  const { locale } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect(`/${locale}/login`);
   }
 
   const user = await getUserById(session.user.id);
   if (!user) {
-    redirect("/login");
+    redirect(`/${locale}/login`);
   }
 
-  const params = await searchParams;
+  const search = await searchParams;
   const [countRow] = await db
     .select({ count: sql<number>`count(*)` })
     .from(approvalNotifications)
@@ -48,14 +55,19 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     );
   const approvalCount = countRow?.count ?? 0;
   const activeTab =
-    params?.tab === "approvals" ? "approvals" : "profile";
+    search?.tab === "approvals" ? "approvals" : "profile";
+  const t = getDictionary(locale);
+  const switchLocale = locale === "ar" ? "en" : "ar";
+  const switchLocaleHref = `/${switchLocale}/account?tab=${activeTab}`;
+  const switchLocaleLabel =
+    switchLocale === "ar" ? t.switchToArabic : t.switchToEnglish;
 
   return (
-    <PageContainer title="Account" maxWidthClassName="max-w-6xl">
+    <PageContainer title={t.account} maxWidthClassName="max-w-6xl">
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/account"
+            href={`/${locale}/account`}
             className={cn(
               "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
               activeTab === "profile"
@@ -63,10 +75,10 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 : "bg-muted text-foreground hover:bg-muted/80"
             )}
           >
-            Profile
+            {t.profile}
           </Link>
           <Link
-            href="/account?tab=approvals"
+            href={`/${locale}/account?tab=approvals`}
             className={cn(
               "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
               activeTab === "approvals"
@@ -75,7 +87,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             )}
           >
             <span className="flex items-center gap-2">
-              Approvals
+              {t.approvals}
               {approvalCount > 0 && (
                 <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
                   {approvalCount}
@@ -83,11 +95,19 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               )}
             </span>
           </Link>
+          <Link
+            href={switchLocaleHref}
+            aria-label={switchLocaleLabel}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          >
+            <Languages className="h-4 w-4" />
+            {switchLocaleLabel}
+          </Link>
         </div>
 
         {activeTab === "approvals" ? (
           <ApprovalsClientWrapper>
-            <ApprovalsPanel userId={user.id} />
+            <ApprovalsPanel userId={user.id} locale={locale} t={t} />
           </ApprovalsClientWrapper>
         ) : (
           <UserProfileForm
@@ -97,6 +117,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               email: user.email,
               avatarUrl: user.avatarUrl,
             }}
+            locale={locale}
+            t={t}
             action={updateUserProfile}
             setAvatarAction={setUserAvatarUrl}
             deleteAvatarAction={deleteUserAvatar}

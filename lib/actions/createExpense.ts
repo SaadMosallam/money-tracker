@@ -27,6 +27,7 @@ export async function createExpense(formData: FormData) {
   const title = String(formData.get("title"));
   const amount = Number(formData.get("amount"));
   const paidById = sessionUserId;
+  const locale = String(formData.get("locale") ?? "en") || "en";
   const participants = JSON.parse(String(formData.get("participants"))) as {
     userId: string;
     weight: number;
@@ -108,8 +109,8 @@ export async function createExpense(formData: FormData) {
   });
 
   // ---------- 5️⃣ Revalidate dashboard ----------
-  revalidatePath("/");
-  revalidatePath("/expenses");
-  revalidatePath("/approvals");
-  redirect("/");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/expenses`);
+  revalidatePath(`/${locale}/approvals`);
+  redirect(`/${locale}`);
 }

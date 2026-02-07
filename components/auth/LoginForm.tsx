@@ -14,8 +14,14 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Dictionary } from "@/lib/i18n";
 
-export function LoginForm() {
+type LoginFormProps = {
+  locale: string;
+  t: Dictionary;
+};
+
+export function LoginForm({ locale, t }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -23,23 +29,23 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const callbackUrl = searchParams.get("callbackUrl") ?? `/${locale}`;
   const authError = searchParams.get("error");
 
   useEffect(() => {
     if (!searchParams.get("callbackUrl")) {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("callbackUrl", "/");
-      router.replace(`/login?${params.toString()}`);
+      params.set("callbackUrl", `/${locale}`);
+      router.replace(`/${locale}/login?${params.toString()}`);
     }
-  }, [router, searchParams]);
+  }, [router, searchParams, locale]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
 
     if (!email.trim() || !password.trim()) {
-      setErrorMessage("Email and password are required.");
+      setErrorMessage(t.emailAndPasswordRequired);
       return;
     }
 
@@ -52,7 +58,7 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setErrorMessage("Invalid email or password.");
+        setErrorMessage(t.invalidEmailPassword);
       }
     });
   };
@@ -60,14 +66,14 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
+        <CardTitle>{t.signInTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <FieldSet>
             <FieldGroup>
               <Field>
-                <FieldLabel>Email</FieldLabel>
+                <FieldLabel>{t.emailLabel}</FieldLabel>
                 <FieldContent>
                   <Input
                     name="email"
@@ -75,12 +81,12 @@ export function LoginForm() {
                     autoComplete="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@example.com"
+                    placeholder={t.emailPlaceholder}
                   />
                 </FieldContent>
               </Field>
               <Field>
-                <FieldLabel>Password</FieldLabel>
+                <FieldLabel>{t.currentPassword}</FieldLabel>
                 <FieldContent>
                   <Input
                     name="password"
@@ -88,14 +94,14 @@ export function LoginForm() {
                     autoComplete="current-password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Your password"
+                    placeholder={t.passwordPlaceholder}
                   />
                 </FieldContent>
               </Field>
             </FieldGroup>
             {(errorMessage || authError) && (
               <FieldError>
-                {errorMessage ?? "Sign in failed. Please try again."}
+                {errorMessage ?? t.signInFailed}
               </FieldError>
             )}
           </FieldSet>
@@ -104,7 +110,7 @@ export function LoginForm() {
             className="w-full cursor-pointer disabled:cursor-not-allowed"
             disabled={isPending}
           >
-            {isPending ? "Signing in..." : "Sign in"}
+            {isPending ? t.signingIn : t.signInTitle}
           </Button>
         </form>
       </CardContent>

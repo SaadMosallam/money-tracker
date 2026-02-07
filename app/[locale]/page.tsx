@@ -4,10 +4,15 @@ import { getUsers } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { BalanceTable, PairwiseDebts } from "@/components/business/balance";
 import { buildUserById } from "@/lib/utils/userById";
-import { defaultLocale, getDictionary } from "@/lib/i18n";
+import { getDictionary, Locale } from "@/lib/i18n";
 
-export default async function Home() {
-  const t = getDictionary(defaultLocale);
+type HomePageProps = {
+  params: Promise<{ locale: Locale }>;
+};
+
+export default async function Home({ params }: HomePageProps) {
+  const { locale } = await params;
+  const t = getDictionary(locale);
   const [balances, users] = await Promise.all([getBalances(), getUsers()]);
 
   const userById = buildUserById(users);

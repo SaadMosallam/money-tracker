@@ -6,6 +6,7 @@ import { approveExpense, rejectExpense } from "@/lib/actions/approvals";
 import { Money } from "@/components/business/primitives/Money";
 import { UserLabel } from "@/components/business/primitives/UserLabel";
 import { formatDateTime } from "@/lib/utils/date";
+import { Dictionary } from "@/lib/i18n";
 
 type ExpenseRowProps = {
   id: string;
@@ -17,6 +18,7 @@ type ExpenseRowProps = {
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";
   canApprove: boolean;
+  t: Dictionary;
 };
 
 export function ExpenseRow({
@@ -29,6 +31,7 @@ export function ExpenseRow({
   createdAt,
   approvalStatus,
   canApprove,
+  t,
 }: ExpenseRowProps) {
   const approvalBadge =
     approvalStatus === "approved"
@@ -52,7 +55,7 @@ export function ExpenseRow({
       </TableCell>
       <TableCell className="whitespace-nowrap">
         <Badge variant={isSettled ? "secondary" : "outline"}>
-          {isSettled ? "Settled" : "Unsettled"}
+          {isSettled ? t.settled : t.unsettled}
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap">
@@ -61,22 +64,22 @@ export function ExpenseRow({
           className={approvalStatus === "rejected" ? "text-white" : undefined}
         >
           {approvalStatus === "approved"
-            ? "Approved"
+            ? t.approved
             : approvalStatus === "rejected"
-              ? "Rejected"
-              : "Pending"}
+              ? t.rejected
+              : t.pending}
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
         {createdAt ? formatDateTime(createdAt) : "—"}
       </TableCell>
-      <TableCell className="whitespace-nowrap text-right">
+      <TableCell className="whitespace-nowrap text-end">
         {canApprove ? (
           <div className="flex justify-end gap-2">
             <form action={approveExpense}>
               <input type="hidden" name="expenseId" value={id} />
               <Button type="submit" size="sm" className="cursor-pointer">
-                Approve
+                {t.approve}
               </Button>
             </form>
             <form action={rejectExpense}>
@@ -87,12 +90,12 @@ export function ExpenseRow({
                 size="sm"
                 className="cursor-pointer"
               >
-                Reject
+                {t.reject}
               </Button>
             </form>
           </div>
         ) : isSettled ? (
-          <span className="text-sm text-muted-foreground">Settled</span>
+          <span className="text-sm text-muted-foreground">{t.settled}</span>
         ) : (
           <form action={markSettled}>
             <input type="hidden" name="expenseId" value={id} />
@@ -102,7 +105,7 @@ export function ExpenseRow({
               size="sm"
               className="cursor-pointer"
             >
-              Mark Settled
+              {t.markSettled}
             </Button>
           </form>
         )}

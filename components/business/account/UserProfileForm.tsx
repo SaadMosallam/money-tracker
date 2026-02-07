@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { isNextRedirect } from "@/lib/utils/isRedirectError";
+import { Dictionary } from "@/lib/i18n";
 
 type UserProfileFormProps = {
   user: {
@@ -28,6 +29,8 @@ type UserProfileFormProps = {
     email: string;
     avatarUrl?: string | null;
   };
+  locale: string;
+  t: Dictionary;
   action: (formData: FormData) => Promise<{
     name: string;
     passwordChanged: boolean;
@@ -38,6 +41,8 @@ type UserProfileFormProps = {
 
 export function UserProfileForm({
   user,
+  locale,
+  t,
   action,
   setAvatarAction,
   deleteAvatarAction,
@@ -76,26 +81,25 @@ export function UserProfileForm({
 
         const nextErrors: typeof fieldErrors = {};
         if (!name.trim()) {
-          nextErrors.name = "Name is required.";
+          nextErrors.name = t.nameRequired;
         }
         if (newPassword || confirmPassword) {
           if (!currentPassword) {
-            nextErrors.currentPassword = "Current password is required.";
+            nextErrors.currentPassword = t.currentPasswordRequired;
           }
           if (currentPassword && newPassword && currentPassword === newPassword) {
-            nextErrors.newPassword =
-              "New password must be different from your current password.";
+            nextErrors.newPassword = t.newPasswordDifferent;
           }
           if (newPassword.length < 8) {
-            nextErrors.newPassword = "New password must be at least 8 characters.";
+            nextErrors.newPassword = t.newPasswordMin;
           }
           if (newPassword !== confirmPassword) {
-            nextErrors.confirmPassword = "Passwords do not match.";
+            nextErrors.confirmPassword = t.passwordsDoNotMatch;
           }
         }
         if (Object.keys(nextErrors).length > 0) {
           setFieldErrors(nextErrors);
-          toast.error("Please fix the highlighted fields.");
+          toast.error(t.fixHighlightedFields);
           return;
         }
 
@@ -103,8 +107,8 @@ export function UserProfileForm({
         const result = await action(formData);
 
         if (result?.passwordChanged) {
-          toast.success("Password updated. Please sign in again.");
-          await signOut({ callbackUrl: "/login" });
+          toast.success(t.passwordUpdatedSignInAgain);
+          await signOut({ callbackUrl: `/${locale}/login` });
           return;
         }
 
@@ -115,16 +119,16 @@ export function UserProfileForm({
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        toast.success("Profile updated.");
-        router.push("/");
+        toast.success(t.profileUpdated);
+        router.push(`/${locale}`);
       } catch (error) {
         if (isNextRedirect(error)) {
-          toast.success("Profile updated.");
+          toast.success(t.profileUpdated);
           return;
         }
         console.error(error);
-        setErrorMessage("Something went wrong. Please try again.");
-        toast.error("Something went wrong. Please try again.");
+        setErrorMessage(t.somethingWentWrong);
+        toast.error(t.somethingWentWrong);
       }
     });
   };
@@ -132,7 +136,7 @@ export function UserProfileForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Account Settings</CardTitle>
+        <CardTitle>{t.accountSettings}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -140,7 +144,7 @@ export function UserProfileForm({
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel>Avatar</FieldLabel>
+                  <FieldLabel>{t.avatar}</FieldLabel>
                   <FieldContent>
                     <div className="flex items-center gap-4">
                       <Avatar className="h-12 w-12">
@@ -188,13 +192,13 @@ export function UserProfileForm({
                                     reject(
                                       new Error(
                                         (xhr.response as { error?: string })?.error ??
-                                          "Upload failed."
+                                          t.somethingWentWrong
                                       )
                                     );
                                   }
                                 };
 
-                                xhr.onerror = () => reject(new Error("Upload failed."));
+                                xhr.onerror = () => reject(new Error(t.somethingWentWrong));
                                 xhr.onabort = () => reject(new Error("aborted"));
 
                                 const data = new FormData();
@@ -212,19 +216,19 @@ export function UserProfileForm({
                             if (update) {
                               await update({ image: result.avatarUrl ?? null });
                             }
-                            toast.success("Avatar updated.");
+                            toast.success(t.avatarUpdated);
                           } catch (error: unknown) {
                             const message =
                               error instanceof Error ? error.message : "";
                             if (message.toLowerCase().includes("aborted")) {
-                              toast.message("Upload canceled.");
+                              toast.message(t.uploadCanceled);
                             } else if (isNextRedirect(error)) {
-                              toast.success("Avatar updated.");
+                              toast.success(t.avatarUpdated);
                               return;
                             } else {
                               console.error(error);
-                              setAvatarError("Could not update avatar. Please try again.");
-                              toast.error("Could not update avatar. Please try again.");
+                              setAvatarError(t.couldNotUpdateAvatar);
+                              toast.error(t.couldNotUpdateAvatar);
                             }
                           } finally {
                             setIsAvatarPending(false);
@@ -239,7 +243,7 @@ export function UserProfileForm({
                     </div>
                   </FieldContent>
                   <FieldDescription>
-                    Upload a square image up to 4MB. Leave empty to keep current.
+                    {t.uploadImageHelp}
                   </FieldDescription>
                 </Field>
               </FieldGroup>
@@ -253,7 +257,7 @@ export function UserProfileForm({
                   }}
                   className="cursor-pointer"
                 >
-                  {isAvatarPending ? "Uploading..." : "Upload Avatar"}
+                  {isAvatarPending ? t.uploading : t.uploadAvatar}
                 </Button>
                 <Button
                   type="button"
@@ -268,15 +272,15 @@ export function UserProfileForm({
                         if (update) {
                           await update({ image: null });
                         }
-                        toast.success("Avatar removed.");
+                        toast.success(t.avatarRemoved);
                       } catch (error) {
                         if (isNextRedirect(error)) {
-                          toast.success("Avatar removed.");
+                          toast.success(t.avatarRemoved);
                           return;
                         }
                         console.error(error);
-                        setAvatarError("Could not remove avatar. Please try again.");
-                        toast.error("Could not remove avatar. Please try again.");
+                        setAvatarError(t.couldNotRemoveAvatar);
+                        toast.error(t.couldNotRemoveAvatar);
                       } finally {
                         setIsAvatarPending(false);
                       }
@@ -285,7 +289,7 @@ export function UserProfileForm({
                   disabled={isAvatarPending || !avatarUrl}
                   className="cursor-pointer"
                 >
-                  Remove Avatar
+                  {t.removeAvatar}
                 </Button>
               </div>
               {uploadProgress !== null && (
@@ -319,7 +323,7 @@ export function UserProfileForm({
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel>Name</FieldLabel>
+                  <FieldLabel>{t.nameLabel}</FieldLabel>
                   <FieldContent>
                     <Input
                       name="name"
@@ -336,11 +340,11 @@ export function UserProfileForm({
                   {fieldErrors.name && <FieldError>{fieldErrors.name}</FieldError>}
                 </Field>
                 <Field>
-                  <FieldLabel>Email</FieldLabel>
+                  <FieldLabel>{t.emailLabel}</FieldLabel>
                   <FieldContent>
                     <Input value={user.email} readOnly />
                   </FieldContent>
-                  <FieldDescription>Email cannot be changed.</FieldDescription>
+                  <FieldDescription>{t.emailCannotBeChanged}</FieldDescription>
                 </Field>
               </FieldGroup>
             </FieldSet>
@@ -351,7 +355,7 @@ export function UserProfileForm({
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel>Current Password</FieldLabel>
+                  <FieldLabel>{t.currentPassword}</FieldLabel>
                   <FieldContent>
                     <Input
                       name="currentPassword"
@@ -371,7 +375,7 @@ export function UserProfileForm({
                   )}
                 </Field>
                 <Field>
-                  <FieldLabel>New Password</FieldLabel>
+                  <FieldLabel>{t.newPassword}</FieldLabel>
                   <FieldContent>
                     <Input
                       name="newPassword"
@@ -391,7 +395,7 @@ export function UserProfileForm({
                   )}
                 </Field>
                 <Field>
-                  <FieldLabel>Confirm New Password</FieldLabel>
+                  <FieldLabel>{t.confirmNewPassword}</FieldLabel>
                   <FieldContent>
                     <Input
                       name="confirmPassword"
@@ -412,7 +416,7 @@ export function UserProfileForm({
                 </Field>
               </FieldGroup>
               <FieldDescription>
-                Leave password fields blank to keep your current password.
+                {t.leavePasswordBlank}
               </FieldDescription>
             </FieldSet>
 
@@ -421,7 +425,7 @@ export function UserProfileForm({
               disabled={isPending}
               className="cursor-pointer"
             >
-              {isPending ? "Saving..." : "Update Password"}
+              {isPending ? t.saving : t.updatePassword}
             </Button>
 
             {errorMessage && <FieldError>{errorMessage}</FieldError>}

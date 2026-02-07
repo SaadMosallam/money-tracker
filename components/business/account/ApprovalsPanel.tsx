@@ -29,12 +29,19 @@ import {
   approvePayment,
   rejectPayment,
 } from "@/lib/actions/approvals";
+import { Dictionary } from "@/lib/i18n";
 
 type ApprovalsPanelProps = {
   userId: string;
+  locale: string;
+  t: Dictionary;
 };
 
-export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
+export default async function ApprovalsPanel({
+  userId,
+  locale,
+  t,
+}: ApprovalsPanelProps) {
   const [notifications, users] = await Promise.all([
     getApprovalNotificationsByUser(userId),
     getUsers(),
@@ -147,31 +154,31 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Pending Expenses</CardTitle>
+          <CardTitle>{t.pendingExpenses}</CardTitle>
         </CardHeader>
         <CardContent>
           {expenseRows.length === 0 ? (
             <div className="text-sm text-muted-foreground">
-              No pending expense approvals.
+              {t.noPendingExpenseApprovals}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Paid By</TableHead>
-                  <TableHead>Participants</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t.title}</TableHead>
+                  <TableHead>{t.amount}</TableHead>
+                  <TableHead>{t.paidBy}</TableHead>
+                  <TableHead>{t.participants}</TableHead>
+                  <TableHead>{t.status}</TableHead>
+                  <TableHead>{t.created}</TableHead>
+                  <TableHead className="text-end">{t.action}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {expenseRows.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="whitespace-nowrap font-medium">
-                      <Link href={`/expenses?focus=${row.id}`}>{row.title}</Link>
+                      <Link href={`/${locale}/expenses?focus=${row.id}`}>{row.title}</Link>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <Money cents={row.amount} />
@@ -183,17 +190,17 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
                       {row.participantsLabel}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      <Badge variant="outline">Pending</Badge>
+                      <Badge variant="outline">{t.pending}</Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.createdAt ? formatDateTime(row.createdAt) : "—"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-right">
+                    <TableCell className="whitespace-nowrap text-end">
                       <div className="flex justify-end gap-2">
                         <form action={approveExpense}>
                           <input type="hidden" name="expenseId" value={row.id} />
                           <Button type="submit" size="sm" className="cursor-pointer">
-                            Approve
+                            {t.approve}
                           </Button>
                         </form>
                         <form action={rejectExpense}>
@@ -204,7 +211,7 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
                             size="sm"
                             className="cursor-pointer"
                           >
-                            Reject
+                            {t.reject}
                           </Button>
                         </form>
                       </div>
@@ -219,23 +226,23 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pending Payments</CardTitle>
+          <CardTitle>{t.pendingPayments}</CardTitle>
         </CardHeader>
         <CardContent>
           {paymentRows.length === 0 ? (
             <div className="text-sm text-muted-foreground">
-              No pending payment approvals.
+              {t.noPendingPaymentApprovals}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t.from}</TableHead>
+                  <TableHead>{t.to}</TableHead>
+                  <TableHead>{t.amount}</TableHead>
+                  <TableHead>{t.status}</TableHead>
+                  <TableHead>{t.created}</TableHead>
+                  <TableHead className="text-end">{t.action}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -251,17 +258,17 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
                       <Money cents={row.amount} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      <Badge variant="outline">Pending</Badge>
+                      <Badge variant="outline">{t.pending}</Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.createdAt ? formatDateTime(row.createdAt) : "—"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-right">
+                    <TableCell className="whitespace-nowrap text-end">
                       <div className="flex justify-end gap-2">
                         <form action={approvePayment}>
                           <input type="hidden" name="paymentId" value={row.id} />
                           <Button type="submit" size="sm" className="cursor-pointer">
-                            Approve
+                            {t.approve}
                           </Button>
                         </form>
                         <form action={rejectPayment}>
@@ -272,7 +279,7 @@ export default async function ApprovalsPanel({ userId }: ApprovalsPanelProps) {
                             size="sm"
                             className="cursor-pointer"
                           >
-                            Reject
+                            {t.reject}
                           </Button>
                         </form>
                       </div>

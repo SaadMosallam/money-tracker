@@ -7,8 +7,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPaymentApprovalsByPaymentIds } from "@/lib/db/queries/approvals";
 import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
+import { getDictionary, Locale } from "@/lib/i18n";
 
-export default async function PaymentsPage() {
+type PaymentsPageProps = {
+  params: Promise<{ locale: Locale }>;
+};
+
+export default async function PaymentsPage({ params }: PaymentsPageProps) {
+  const { locale } = await params;
+  const t = getDictionary(locale);
   const [payments, users, session] = await Promise.all([
     getPayments(),
     getUsers(),
@@ -46,8 +53,8 @@ export default async function PaymentsPage() {
   });
 
   return (
-    <PageContainer title="Payments">
-      <PaymentList rows={rows} />
+    <PageContainer title={t.payments}>
+      <PaymentList rows={rows} t={t} />
     </PageContainer>
   );
 }

@@ -10,6 +10,7 @@ import {
   paymentApprovals,
 } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
+import { locales } from "@/lib/i18n";
 
 const resolveNotification = async (
   userId: string,
@@ -53,9 +54,12 @@ export async function approveExpense(formData: FormData) {
 
   await resolveNotification(userId, "expense", expenseId);
 
-  revalidatePath("/");
-  revalidatePath("/expenses");
-  revalidatePath("/approvals");
+  for (const locale of locales) {
+    revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/expenses`);
+    revalidatePath(`/${locale}/approvals`);
+    revalidatePath(`/${locale}/account`);
+  }
 }
 
 export async function rejectExpense(formData: FormData) {
@@ -82,9 +86,12 @@ export async function rejectExpense(formData: FormData) {
 
   await resolveNotification(userId, "expense", expenseId);
 
-  revalidatePath("/");
-  revalidatePath("/expenses");
-  revalidatePath("/approvals");
+  for (const locale of locales) {
+    revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/expenses`);
+    revalidatePath(`/${locale}/approvals`);
+    revalidatePath(`/${locale}/account`);
+  }
 }
 
 export async function approvePayment(formData: FormData) {
@@ -111,9 +118,12 @@ export async function approvePayment(formData: FormData) {
 
   await resolveNotification(userId, "payment", paymentId);
 
-  revalidatePath("/");
-  revalidatePath("/payments");
-  revalidatePath("/approvals");
+  for (const locale of locales) {
+    revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/payments`);
+    revalidatePath(`/${locale}/approvals`);
+    revalidatePath(`/${locale}/account`);
+  }
 }
 
 export async function rejectPayment(formData: FormData) {
@@ -140,7 +150,10 @@ export async function rejectPayment(formData: FormData) {
 
   await resolveNotification(userId, "payment", paymentId);
 
-  revalidatePath("/");
-  revalidatePath("/payments");
-  revalidatePath("/approvals");
+  for (const locale of locales) {
+    revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/payments`);
+    revalidatePath(`/${locale}/approvals`);
+    revalidatePath(`/${locale}/account`);
+  }
 }

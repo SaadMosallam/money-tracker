@@ -5,6 +5,7 @@ import { formatDateTime } from "@/lib/utils/date";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { approvePayment, rejectPayment } from "@/lib/actions/approvals";
+import { Dictionary } from "@/lib/i18n";
 
 type PaymentRowProps = {
   id: string;
@@ -14,6 +15,7 @@ type PaymentRowProps = {
   createdAt: Date | null;
   approvalStatus: "pending" | "approved" | "rejected";
   canApprove: boolean;
+  t: Dictionary;
 };
 
 export function PaymentRow({
@@ -24,6 +26,7 @@ export function PaymentRow({
   createdAt,
   approvalStatus,
   canApprove,
+  t,
 }: PaymentRowProps) {
   const approvalBadge =
     approvalStatus === "approved"
@@ -48,22 +51,22 @@ export function PaymentRow({
           className={approvalStatus === "rejected" ? "text-white" : undefined}
         >
           {approvalStatus === "approved"
-            ? "Approved"
+            ? t.approved
             : approvalStatus === "rejected"
-              ? "Rejected"
-              : "Pending"}
+              ? t.rejected
+              : t.pending}
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
         {createdAt ? formatDateTime(createdAt) : "—"}
       </TableCell>
-      <TableCell className="whitespace-nowrap text-right">
+      <TableCell className="whitespace-nowrap text-end">
         {canApprove ? (
           <div className="flex justify-end gap-2">
             <form action={approvePayment}>
               <input type="hidden" name="paymentId" value={id} />
               <Button type="submit" size="sm" className="cursor-pointer">
-                Approve
+                {t.approve}
               </Button>
             </form>
             <form action={rejectPayment}>
@@ -74,7 +77,7 @@ export function PaymentRow({
                 size="sm"
                 className="cursor-pointer"
               >
-                Reject
+                {t.reject}
               </Button>
             </form>
           </div>

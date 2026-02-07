@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PaymentRow } from "@/components/business/payment/PaymentRow";
+import { Dictionary } from "@/lib/i18n";
 
 type PaymentRowData = {
   id: string;
@@ -20,34 +21,37 @@ type PaymentRowData = {
 
 type PaymentListProps = {
   rows: PaymentRowData[];
+  t: Dictionary;
 };
 
-export function PaymentList({ rows }: PaymentListProps) {
+export function PaymentList({ rows, t }: PaymentListProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Payments</CardTitle>
+        <CardTitle>{t.allPayments}</CardTitle>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
           <div className="text-sm text-muted-foreground">
-            No payments yet.
+            {t.noPaymentsYet}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap">From</TableHead>
-                <TableHead className="whitespace-nowrap">To</TableHead>
-                <TableHead className="whitespace-nowrap">Amount</TableHead>
-                <TableHead className="whitespace-nowrap">Approval</TableHead>
-                <TableHead className="whitespace-nowrap">Created</TableHead>
-                <TableHead className="whitespace-nowrap text-right">Action</TableHead>
+                <TableHead className="whitespace-nowrap">{t.from}</TableHead>
+                <TableHead className="whitespace-nowrap">{t.to}</TableHead>
+                <TableHead className="whitespace-nowrap">{t.amount}</TableHead>
+                <TableHead className="whitespace-nowrap">{t.approval}</TableHead>
+                <TableHead className="whitespace-nowrap">{t.created}</TableHead>
+                <TableHead className="whitespace-nowrap text-end">
+                  {t.action}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
-                <PaymentRow key={row.id} {...row} />
+                <PaymentRow key={row.id} {...row} t={t} />
               ))}
             </TableBody>
           </Table>

@@ -19,6 +19,7 @@ export async function createPayment(formData: FormData): Promise<void> {
   const fromUserId = sessionUserId;
   const toUserId = String(formData.get("toUserId"));
   const amount = Number(formData.get("amount"));
+  const locale = String(formData.get("locale") ?? "en") || "en";
 
   // ---------- 1️⃣ Basic domain validation ----------
   if (!fromUserId || !toUserId) {
@@ -75,8 +76,8 @@ export async function createPayment(formData: FormData): Promise<void> {
   });
 
   // ---------- 4️⃣ Revalidate ----------
-  revalidatePath("/");
-  revalidatePath("/payments");
-  revalidatePath("/approvals");
-  redirect("/");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/payments`);
+  revalidatePath(`/${locale}/approvals`);
+  redirect(`/${locale}`);
 }

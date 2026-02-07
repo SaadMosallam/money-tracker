@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Money Tracker",
     short_name: "Money Tracker",
     description: "Track your expenses and balances among a group of friends",
-    start_url: "/",
+    start_url: "/en",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#0f172a",

@@ -15,10 +15,12 @@ import {
   Moon,
   LogIn,
   LogOut,
+  Languages,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUserInitials } from "@/lib/utils/userInitials";
+import { defaultLocale, dictionary, getLocaleFromPathname } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -30,25 +32,25 @@ import {
 
 type NavItem = {
   href: string;
-  label: string;
-  mobileLabel?: string;
+  label: keyof typeof dictionary["en"];
+  mobileLabel?: keyof typeof dictionary["en"];
   icon: React.ReactNode;
 };
 
 const navItems: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { href: "/expenses", label: "Expenses", icon: <Receipt className="h-4 w-4" /> },
-  { href: "/payments", label: "Payments", icon: <ArrowRightLeft className="h-4 w-4" /> },
+  { href: "/", label: "dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+  { href: "/expenses", label: "expenses", icon: <Receipt className="h-4 w-4" /> },
+  { href: "/payments", label: "payments", icon: <ArrowRightLeft className="h-4 w-4" /> },
   {
     href: "/expenses/new",
-    label: "New Expense",
-    mobileLabel: "Expense",
+    label: "newExpense",
+    mobileLabel: "expenses",
     icon: <PlusCircle className="h-4 w-4" />,
   },
   {
     href: "/payments/new",
-    label: "New Payment",
-    mobileLabel: "Payment",
+    label: "newPayment",
+    mobileLabel: "payments",
     icon: <BanknoteArrowUp className="h-4 w-4" />,
   },
 ];
@@ -60,7 +62,20 @@ const isActive = (pathname: string, href: string) => {
 export function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const isLoginPage = pathname === "/login";
+  const locale = getLocaleFromPathname(pathname) ?? defaultLocale;
+  const t = dictionary[locale];
+  const withLocale = (href: string) =>
+    href === "/" ? `/${locale}` : `/${locale}${href}`;
+  const switchLocale = locale === "ar" ? "en" : "ar";
+  const switchLocalePath = (() => {
+    const withoutLocale = pathname.startsWith(`/${locale}`)
+      ? pathname.replace(`/${locale}`, "") || "/"
+      : pathname;
+    return `/${switchLocale}${withoutLocale}`;
+  })();
+  const switchLocaleLabel =
+    switchLocale === "ar" ? t.switchToArabic : t.switchToEnglish;
+  const isLoginPage = pathname === `/${locale}/login`;
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const displayName = session?.user?.name ?? session?.user?.email ?? "Account";
@@ -109,52 +124,52 @@ export function AppNav() {
   return (
     <>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-4 py-2 backdrop-blur md:hidden">
-        {pathname === "/" ? (
+        {pathname === withLocale("/") ? (
           <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
             <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
-            Money Tracker
+            {t.appName}
           </span>
         ) : (
           <Link
-            href="/"
+            href={withLocale("/")}
             className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
           >
             <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
-            Money Tracker
+            {t.appName}
           </Link>
         )}
           {!isLoginPage &&
           (isAuthenticated ? (
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={() => signOut({ callbackUrl: withLocale("/login") })}
               className={authActionClassNameMobile}
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              {t.signOut}
             </button>
           ) : (
-            <Link href="/login" className={authActionClassNameMobile}>
+            <Link href={withLocale("/login")} className={authActionClassNameMobile}>
               <LogIn className="h-4 w-4" />
-              Sign in
+              {t.signIn}
             </Link>
           ))}
       </header>
 
       <header className="sticky top-0 z-40 hidden border-b bg-background/95 backdrop-blur md:block">
         <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center px-4">
-          {pathname === "/" ? (
+          {pathname === withLocale("/") ? (
             <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
               <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
-              Money Tracker
+              {t.appName}
             </span>
           ) : (
             <Link
-              href="/"
+              href={withLocale("/")}
               className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground/80"
             >
               <img src="/logo.svg" alt="Money Tracker" className="h-7 w-7" />
-              Money Tracker
+              {t.appName}
             </Link>
           )}
           {isLoginPage ? (
@@ -166,13 +181,11 @@ export function AppNav() {
             <>
               <nav className="flex items-center justify-center gap-3 text-sm">
                 {navItems.map((item) => {
-                  const active = isActive(pathname, item.href);
-                  const showBadge =
-                    item.href === "/approvals" && approvalCount > 0;
+                  const active = isActive(pathname, withLocale(item.href));
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={withLocale(item.href)}
                       className={cn(
                         "flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors",
                         active
@@ -182,12 +195,7 @@ export function AppNav() {
                     >
                       {item.icon}
                       <span className="flex items-center gap-2">
-                        {item.label}
-                        {showBadge && (
-                          <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
-                            {approvalCount}
-                          </span>
-                        )}
+                        {t[item.label]}
                       </span>
                     </Link>
                   );
@@ -229,41 +237,49 @@ export function AppNav() {
                             </span>
                           )}
                         </span>
-                        <span>Hi, {displayName}</span>
+                        <span>
+                          {t.hi}, {displayName}
+                        </span>
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem
-                        onSelect={() => router.push("/account")}
+                        onSelect={() => router.push(withLocale("/account"))}
                       >
-                        Account
+                        {t.account}
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => router.push("/account?tab=approvals")}
-                      >
-                        <span className="flex items-center gap-2">
-                          Approvals
+                    <DropdownMenuItem
+                      onSelect={() => router.push(withLocale("/account?tab=approvals"))}
+                    >
+                      <span className="flex items-center gap-2">
+                        {t.approvals}
                           {approvalCount > 0 && (
                             <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
                               {approvalCount}
                             </span>
                           )}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => router.push(switchLocalePath)}
+                    >
+                      <Languages className="mr-2 h-4 w-4" />
+                      {switchLocaleLabel}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        onClick={() => signOut({ callbackUrl: withLocale("/login") })}
                       >
                         <LogOut className="mr-2 h-4 w-4" />
-                        Sign out
+                        {t.signOut}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
                 {!isAuthenticated && (
-                  <Link href="/login" className={authActionClassName}>
+                  <Link href={withLocale("/login")} className={authActionClassName}>
                     <LogIn className="h-4 w-4" />
-                    Sign in
+                    {t.signIn}
                   </Link>
                 )}
               </div>
@@ -276,11 +292,11 @@ export function AppNav() {
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
           <div className="grid grid-cols-6">
             {navItems.map((item) => {
-              const active = isActive(pathname, item.href);
+              const active = isActive(pathname, withLocale(item.href));
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={withLocale(item.href)}
                   className={cn(
                     "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
                     active ? "text-foreground" : "text-muted-foreground"
@@ -288,16 +304,16 @@ export function AppNav() {
                 >
                   {item.icon}
                   <span className="whitespace-normal">
-                    {item.mobileLabel ?? item.label}
+                    {t[item.mobileLabel ?? item.label]}
                   </span>
                 </Link>
               );
             })}
             <Link
-              href="/account"
+              href={withLocale("/account")}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
-                pathname.startsWith("/account")
+                pathname.startsWith(`/${locale}/account`)
                   ? "text-foreground"
                   : "text-muted-foreground"
               )}
@@ -315,7 +331,7 @@ export function AppNav() {
                   </span>
                 )}
               </span>
-              <span className="whitespace-normal">Account</span>
+              <span className="whitespace-normal">{t.account}</span>
             </Link>
           </div>
         </nav>

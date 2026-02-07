@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { AppNav } from "@/components/business/layout/AppNav";
 import { AuthSessionProvider } from "@/components/auth/SessionProvider";
+import { headers } from "next/headers";
+import { defaultLocale, rtlLocales } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
   description: "Track your expenses and balances among a group of friends",
   icons: {
     icon: [
+      { url: "/favicon.ico", type: "image/x-icon" },
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.png", sizes: "64x64", type: "image/png" },
       { url: "/icons/icon-16.png", sizes: "16x16", type: "image/png" },
@@ -29,13 +32,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const locale = headerList.get("x-locale") ?? defaultLocale;
+  const dir = rtlLocales.includes(locale as "ar" | "en") ? "rtl" : "ltr";
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={dir}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

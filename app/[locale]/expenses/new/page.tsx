@@ -1,11 +1,18 @@
-import { createPayment } from "@/lib/actions/createPayment";
 import { getUsers } from "@/lib/db/queries/users";
 import { PageContainer } from "@/components/business/layout/PageContainer";
-import { PaymentCreateForm } from "@/components/business/payment/PaymentCreateForm";
+import { ExpenseForm } from "@/components/business/expense/ExpenseForm";
+import { createExpense } from "@/lib/actions/createExpense";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getDictionary, Locale } from "@/lib/i18n";
 
-export default async function NewPaymentPage() {
+type NewExpensePageProps = {
+  params: Promise<{ locale: Locale }>;
+};
+
+export default async function NewExpensePage({ params }: NewExpensePageProps) {
+  const { locale } = await params;
+  const t = getDictionary(locale);
   const [users, session] = await Promise.all([
     getUsers(),
     getServerSession(authOptions),
@@ -14,12 +21,14 @@ export default async function NewPaymentPage() {
   const currentUserName = session?.user?.name ?? "";
 
   return (
-    <PageContainer title="Create Payment">
-      <PaymentCreateForm
+    <PageContainer title={t.newExpense}>
+      <ExpenseForm
         users={users}
-        action={createPayment}
+        action={createExpense}
         currentUserId={currentUserId}
         currentUserName={currentUserName}
+        locale={locale}
+        t={t}
       />
     </PageContainer>
   );
