@@ -23,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { parseCurrencyToCents, sanitizeCurrencyInput } from "@/lib/utils/currency";
 import { isNextRedirect } from "@/lib/utils/isRedirectError";
 import { Dictionary } from "@/lib/i18n";
-import { Dictionary } from "@/lib/i18n";
 
 type UserOption = {
   id: string;

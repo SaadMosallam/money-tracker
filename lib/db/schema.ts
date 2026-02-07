@@ -7,6 +7,7 @@ import {
   timestamp,
   primaryKey,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 /* ================= USERS ================= */

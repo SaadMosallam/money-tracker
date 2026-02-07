@@ -14,12 +14,12 @@ const RESET_TTL_MS = 1000 * 60 * 60; // 1 hour
 const hashToken = (token: string) =>
   createHash("sha256").update(token).digest("hex");
 
-export async function requestPasswordReset(formData: FormData) {
+export async function requestPasswordReset(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
 
   // Always return a generic response to avoid user enumeration
   if (!email || !isValidEmail(email)) {
-    return { ok: true };
+    return;
   }
 
   const [user] = await db
@@ -29,7 +29,7 @@ export async function requestPasswordReset(formData: FormData) {
     .limit(1);
 
   if (!user) {
-    return { ok: true };
+    return;
   }
 
   const token = randomBytes(32).toString("hex");
@@ -46,11 +46,9 @@ export async function requestPasswordReset(formData: FormData) {
     recipientName: user.name ?? user.email,
     token,
   });
-
-  return { ok: true };
 }
 
-export async function resetPassword(formData: FormData) {
+export async function resetPassword(formData: FormData): Promise<void> {
   const token = String(formData.get("token") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
@@ -91,5 +89,4 @@ export async function resetPassword(formData: FormData) {
   });
 
   revalidatePath("/login");
-  return { ok: true };
 }

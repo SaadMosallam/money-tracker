@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { rtlLocales } from "@/lib/i18n";
+import { type Locale, rtlLocales } from "@/lib/i18n";
 
 type LocaleLayoutProps = {
   children: ReactNode;
@@ -11,7 +11,7 @@ export default async function LocaleLayout({
   params,
 }: LocaleLayoutProps) {
   const { locale } = await params;
-  const dir = rtlLocales.includes(locale) ? "rtl" : "ltr";
+  const dir = rtlLocales.includes(locale as Locale) ? "rtl" : "ltr";
 
   return (
     <div dir={dir} lang={locale} className="min-h-screen">
