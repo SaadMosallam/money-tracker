@@ -173,7 +173,7 @@ export default async function ApprovalsPanel({
                   <TableHead>{t.participants}</TableHead>
                   <TableHead>{t.status}</TableHead>
                   <TableHead>{t.created}</TableHead>
-                  <TableHead className="text-end">{t.action}</TableHead>
+                  <TableHead className="text-left">{t.action}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,7 +197,7 @@ export default async function ApprovalsPanel({
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.createdAt ? formatDateTime(row.createdAt) : "—"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-end">
+                    <TableCell className="whitespace-nowrap text-left">
                       <div className="flex justify-end gap-2">
                         <form action={approveExpense}>
                           <input type="hidden" name="expenseId" value={row.id} />
@@ -246,7 +246,7 @@ export default async function ApprovalsPanel({
                   </TableHead>
                   <TableHead>{t.status}</TableHead>
                   <TableHead>{t.created}</TableHead>
-                  <TableHead className="text-end">{t.action}</TableHead>
+                  <TableHead className="text-left">{t.action}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -267,7 +267,7 @@ export default async function ApprovalsPanel({
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.createdAt ? formatDateTime(row.createdAt) : "—"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-end">
+                    <TableCell className="whitespace-nowrap text-left">
                       <div className="flex justify-end gap-2">
                         <form action={approvePayment}>
                           <input type="hidden" name="paymentId" value={row.id} />

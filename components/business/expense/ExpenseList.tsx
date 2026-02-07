@@ -55,7 +55,7 @@ export function ExpenseList({
           <TableHead>{t.status}</TableHead>
           <TableHead>{t.approval}</TableHead>
           <TableHead>{t.created}</TableHead>
-          <TableHead className="whitespace-nowrap text-end">
+          <TableHead className="whitespace-nowrap text-left">
             {t.action}
           </TableHead>
         </TableRow>

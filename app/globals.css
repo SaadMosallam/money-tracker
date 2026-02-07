@@ -133,7 +133,22 @@
   }
 }
 
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] table {
+  direction: rtl;
+}
+
 [dir="rtl"] th,
 [dir="rtl"] td {
   text-align: right !important;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
 }

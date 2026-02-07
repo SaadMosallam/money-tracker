@@ -95,14 +95,19 @@ export default async function AccountPage({
               )}
             </span>
           </Link>
-          <Link
-            href={switchLocaleHref}
+          <button
+            type="button"
             aria-label={switchLocaleLabel}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.assign(switchLocaleHref);
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground cursor-pointer"
           >
             <Languages className="h-4 w-4" />
             {switchLocaleLabel}
-          </Link>
+          </button>
         </div>
 
         {activeTab === "approvals" ? (

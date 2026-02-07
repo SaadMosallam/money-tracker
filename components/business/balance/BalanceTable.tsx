@@ -34,7 +34,7 @@ export function BalanceTable({ rows, t }: BalanceTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>{t.user}</TableHead>
-              <TableHead className="text-end">
+              <TableHead className="text-left">
                 {t.balance} ({t.egp})
               </TableHead>
             </TableRow>
@@ -49,7 +49,7 @@ export function BalanceTable({ rows, t }: BalanceTableProps) {
                     showAvatar
                   />
                 </TableCell>
-                <TableCell className="text-end">
+                <TableCell className="text-left">
                   <Money cents={row.balance} />
                 </TableCell>
               </TableRow>

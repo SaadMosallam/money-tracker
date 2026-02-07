@@ -60,7 +60,7 @@ export function PaymentRow({
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
         {createdAt ? formatDateTime(createdAt) : "—"}
       </TableCell>
-      <TableCell className="whitespace-nowrap text-end">
+      <TableCell className="whitespace-nowrap text-left">
         {canApprove ? (
           <div className="flex justify-end gap-2">
             <form action={approvePayment}>

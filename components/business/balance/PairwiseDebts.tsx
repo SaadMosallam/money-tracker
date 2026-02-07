@@ -92,7 +92,7 @@ export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
               <TableRow>
                 <TableHead className="whitespace-nowrap">{t.from}</TableHead>
                 <TableHead className="whitespace-nowrap">{t.to}</TableHead>
-                <TableHead className="text-end whitespace-nowrap">
+                <TableHead className="text-left whitespace-nowrap">
                   {t.amount} ({t.egp})
                 </TableHead>
               </TableRow>
@@ -116,7 +116,7 @@ export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
                       showAvatar
                     />
                   </TableCell>
-                  <TableCell className="text-end">
+                  <TableCell className="text-left">
                     <Money cents={transfer.amount} />
                   </TableCell>
                 </TableRow>

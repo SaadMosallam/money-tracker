@@ -46,7 +46,7 @@ export function PaymentList({ rows, t }: PaymentListProps) {
                 </TableHead>
                 <TableHead className="whitespace-nowrap">{t.approval}</TableHead>
                 <TableHead className="whitespace-nowrap">{t.created}</TableHead>
-                <TableHead className="whitespace-nowrap text-end">
+                <TableHead className="whitespace-nowrap text-left">
                   {t.action}
                 </TableHead>
               </TableRow>

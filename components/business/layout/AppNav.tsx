@@ -261,7 +261,11 @@ export function AppNav() {
                       </span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onSelect={() => router.push(switchLocalePath)}
+                      onSelect={() => {
+                        if (typeof window !== "undefined") {
+                          window.location.assign(switchLocalePath);
+                        }
+                      }}
                     >
                       <Languages className="mr-2 h-4 w-4" />
                       {switchLocaleLabel}
