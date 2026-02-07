@@ -6,6 +6,7 @@ import {
   expenseApprovals,
   expenseParticipants,
   expenses,
+  users,
 } from "@/lib/db/schema";
 import {
   validateExpenseRows,
@@ -16,6 +17,8 @@ import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { inArray } from "drizzle-orm";
+import { sendPendingApprovalEmail } from "@/lib/email/send";
 
 export async function createExpense(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -102,11 +105,33 @@ export async function createExpense(formData: FormData) {
     }
     if (notificationRows.length > 0) {
       await tx
-        .insert(approvalNotifications)
-        .values(notificationRows)
-        .onConflictDoNothing();
+      .insert(approvalNotifications)
+      .values(notificationRows)
+      .onConflictDoNothing();
     }
   });
+
+  if (approverIds.length > 0) {
+    const approvers = await db
+      .select({ id: users.id, email: users.email, name: users.name })
+      .from(users)
+      .where(inArray(users.id, approverIds));
+
+    await Promise.all(
+      approvers
+        .filter((approver) => approver.email)
+        .map((approver) =>
+          sendPendingApprovalEmail(approver.email, {
+            recipientName: approver.name ?? approver.email,
+            entityType: "expense",
+            title,
+            amountCents: amount,
+            paidByName: session?.user?.name ?? session?.user?.email ?? "—",
+            locale,
+          })
+        )
+    );
+  }
 
   // ---------- 5️⃣ Revalidate dashboard ----------
   revalidatePath(`/${locale}`);

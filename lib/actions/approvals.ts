@@ -8,9 +8,13 @@ import {
   approvalNotifications,
   expenseApprovals,
   paymentApprovals,
+  expenses,
+  payments,
+  users,
 } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
 import { locales } from "@/lib/i18n";
+import { sendDecisionEmail } from "@/lib/email/send";
 
 const resolveNotification = async (
   userId: string,
@@ -54,6 +58,34 @@ export async function approveExpense(formData: FormData) {
 
   await resolveNotification(userId, "expense", expenseId);
 
+  const [expense] = await db
+    .select()
+    .from(expenses)
+    .where(eq(expenses.id, expenseId))
+    .limit(1);
+
+  if (expense) {
+    const locale = "en";
+    const [payer] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, expense.paidById))
+      .limit(1);
+
+    if (payer?.email) {
+      await sendDecisionEmail(payer.email, {
+        recipientName: payer.name ?? payer.email,
+        entityType: "expense",
+        decision: "approved",
+        amountCents: expense.amount,
+        title: expense.title,
+        paidByName: payer.name ?? payer.email,
+        decidedByName: session?.user?.name ?? session?.user?.email ?? "—",
+        locale,
+      });
+    }
+  }
+
   for (const locale of locales) {
     revalidatePath(`/${locale}`);
     revalidatePath(`/${locale}/expenses`);
@@ -85,6 +117,34 @@ export async function rejectExpense(formData: FormData) {
     .where(and(eq(expenseApprovals.expenseId, expenseId), eq(expenseApprovals.userId, userId)));
 
   await resolveNotification(userId, "expense", expenseId);
+
+  const [expense] = await db
+    .select()
+    .from(expenses)
+    .where(eq(expenses.id, expenseId))
+    .limit(1);
+
+  if (expense) {
+    const locale = "en";
+    const [payer] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, expense.paidById))
+      .limit(1);
+
+    if (payer?.email) {
+      await sendDecisionEmail(payer.email, {
+        recipientName: payer.name ?? payer.email,
+        entityType: "expense",
+        decision: "rejected",
+        amountCents: expense.amount,
+        title: expense.title,
+        paidByName: payer.name ?? payer.email,
+        decidedByName: session?.user?.name ?? session?.user?.email ?? "—",
+        locale,
+      });
+    }
+  }
 
   for (const locale of locales) {
     revalidatePath(`/${locale}`);
@@ -118,6 +178,39 @@ export async function approvePayment(formData: FormData) {
 
   await resolveNotification(userId, "payment", paymentId);
 
+  const [payment] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.id, paymentId))
+    .limit(1);
+
+  if (payment) {
+    const locale = "en";
+    const [fromUser] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, payment.fromUserId))
+      .limit(1);
+    const [toUser] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, payment.toUserId))
+      .limit(1);
+
+    if (fromUser?.email) {
+      await sendDecisionEmail(fromUser.email, {
+        recipientName: fromUser.name ?? fromUser.email,
+        entityType: "payment",
+        decision: "approved",
+        amountCents: payment.amount,
+        fromName: fromUser.name ?? fromUser.email,
+        toName: toUser?.name ?? toUser?.email ?? "—",
+        decidedByName: session?.user?.name ?? session?.user?.email ?? "—",
+        locale,
+      });
+    }
+  }
+
   for (const locale of locales) {
     revalidatePath(`/${locale}`);
     revalidatePath(`/${locale}/payments`);
@@ -149,6 +242,39 @@ export async function rejectPayment(formData: FormData) {
     .where(and(eq(paymentApprovals.paymentId, paymentId), eq(paymentApprovals.userId, userId)));
 
   await resolveNotification(userId, "payment", paymentId);
+
+  const [payment] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.id, paymentId))
+    .limit(1);
+
+  if (payment) {
+    const locale = "en";
+    const [fromUser] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, payment.fromUserId))
+      .limit(1);
+    const [toUser] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, payment.toUserId))
+      .limit(1);
+
+    if (fromUser?.email) {
+      await sendDecisionEmail(fromUser.email, {
+        recipientName: fromUser.name ?? fromUser.email,
+        entityType: "payment",
+        decision: "rejected",
+        amountCents: payment.amount,
+        fromName: fromUser.name ?? fromUser.email,
+        toName: toUser?.name ?? toUser?.email ?? "—",
+        decidedByName: session?.user?.name ?? session?.user?.email ?? "—",
+        locale,
+      });
+    }
+  }
 
   for (const locale of locales) {
     revalidatePath(`/${locale}`);

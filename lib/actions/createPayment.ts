@@ -1,13 +1,15 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { approvalNotifications, paymentApprovals, payments } from "@/lib/db/schema";
+import { approvalNotifications, paymentApprovals, payments, users } from "@/lib/db/schema";
 import { validatePaymentRows } from "@/lib/validation/rows";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { sendPendingApprovalEmail } from "@/lib/email/send";
+import { inArray } from "drizzle-orm";
 
 export async function createPayment(formData: FormData): Promise<void> {
   const session = await getServerSession(authOptions);
@@ -74,6 +76,23 @@ export async function createPayment(formData: FormData): Promise<void> {
       .values(notificationRows)
       .onConflictDoNothing();
   });
+
+  const [recipient] = await db
+    .select({ email: users.email, name: users.name })
+    .from(users)
+    .where(inArray(users.id, [toUserId]))
+    .limit(1);
+
+  if (recipient?.email) {
+    await sendPendingApprovalEmail(recipient.email, {
+      recipientName: recipient.name ?? recipient.email,
+      entityType: "payment",
+      amountCents: amount,
+      fromName: session?.user?.name ?? session?.user?.email ?? "—",
+      toName: recipient.name ?? recipient.email,
+      locale,
+    });
+  }
 
   // ---------- 4️⃣ Revalidate ----------
   revalidatePath(`/${locale}`);
