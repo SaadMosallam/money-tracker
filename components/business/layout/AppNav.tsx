@@ -222,7 +222,7 @@ export function AppNav() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-foreground hover:bg-muted/60"
+                        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-foreground hover:bg-muted/60 cursor-pointer"
                       >
                         <span className="relative">
                           <Avatar className="h-7 w-7">
