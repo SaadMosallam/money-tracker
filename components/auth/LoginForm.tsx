@@ -78,8 +78,8 @@ export function LoginForm({ locale, t }: LoginFormProps) {
                 <FieldContent>
                   <Input
                     name="email"
-                    type="email"
-                    autoComplete="email"
+                    type="text"
+                    autoComplete="username"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder={t.emailOrUsernamePlaceholder}
