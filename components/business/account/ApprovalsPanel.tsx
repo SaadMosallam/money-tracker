@@ -183,7 +183,7 @@ export default async function ApprovalsPanel({
                       <Link href={`/${locale}/expenses?focus=${row.id}`}>{row.title}</Link>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      <Money cents={row.amount} />
+                      <Money cents={row.amount} locale={locale} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <span className="max-w-[160px] truncate" title={row.paidByName}>
@@ -265,7 +265,7 @@ export default async function ApprovalsPanel({
                       </span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      <Money cents={row.amount} />
+                      <Money cents={row.amount} locale={locale} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <Badge variant="outline">{t.pending}</Badge>

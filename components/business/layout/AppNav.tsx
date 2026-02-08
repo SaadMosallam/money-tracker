@@ -11,6 +11,7 @@ import {
   Receipt,
   BanknoteArrowUp,
   User,
+  CheckCircle2,
   Sun,
   Moon,
   LogIn,
@@ -83,6 +84,7 @@ export function AppNav() {
   const displayInitials = getUserInitials(displayName);
   const [approvalCount, setApprovalCount] = useState(0);
   const { theme, setTheme } = useTheme();
+  const themeLabel = theme === "dark" ? t.lightMode : t.darkMode;
 
   useEffect(() => {
     if (!isAuthenticated || isLoginPage) return;
@@ -202,21 +204,6 @@ export function AppNav() {
                 })}
               </nav>
               <div className="flex items-center justify-end gap-2 text-sm">
-                <button
-                  type="button"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className={cn(
-                    "rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60 cursor-pointer",
-                    isAuthenticated ? "mr-1" : ""
-                  )}
-                  aria-label="Toggle theme"
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-4 w-4" />
-                  ) : (
-                    <Moon className="h-4 w-4" />
-                  )}
-                </button>
                 {isAuthenticated && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -246,12 +233,14 @@ export function AppNav() {
                       <DropdownMenuItem
                         onSelect={() => router.push(withLocale("/account"))}
                       >
+                        <User className="mr-2 h-4 w-4" />
                         {t.account}
                       </DropdownMenuItem>
                     <DropdownMenuItem
                       onSelect={() => router.push(withLocale("/account?tab=approvals"))}
                     >
                       <span className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
                         {t.approvals}
                           {approvalCount > 0 && (
                             <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
@@ -269,6 +258,16 @@ export function AppNav() {
                     >
                       <Languages className="mr-2 h-4 w-4" />
                       {switchLocaleLabel}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    >
+                      {theme === "dark" ? (
+                        <Sun className="mr-2 h-4 w-4" />
+                      ) : (
+                        <Moon className="mr-2 h-4 w-4" />
+                      )}
+                      {themeLabel}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                       <DropdownMenuItem

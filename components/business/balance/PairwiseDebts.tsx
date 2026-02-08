@@ -29,6 +29,7 @@ type PairwiseDebtsProps = {
     }
   >;
   t: Dictionary;
+  locale: string;
 };
 
 const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
@@ -73,7 +74,12 @@ const buildPairwiseDebts = (balances: BalanceByUserId): PairwiseDebt[] => {
   return transfers;
 };
 
-export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
+export function PairwiseDebts({
+  balances,
+  userById,
+  t,
+  locale,
+}: PairwiseDebtsProps) {
   const transfers = buildPairwiseDebts(balances);
 
   return (
@@ -117,7 +123,7 @@ export function PairwiseDebts({ balances, userById, t }: PairwiseDebtsProps) {
                     />
                   </TableCell>
                   <TableCell className="text-left">
-                    <Money cents={transfer.amount} />
+                    <Money cents={transfer.amount} locale={locale} />
                   </TableCell>
                 </TableRow>
               ))}

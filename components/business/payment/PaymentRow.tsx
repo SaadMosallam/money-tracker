@@ -48,7 +48,7 @@ export function PaymentRow({
         <UserLabel name={toName} />
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        <Money cents={amount} />
+        <Money cents={amount} locale={locale} />
       </TableCell>
       <TableCell className="whitespace-nowrap">
         <Badge

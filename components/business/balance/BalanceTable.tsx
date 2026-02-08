@@ -21,9 +21,10 @@ type BalanceRow = {
 type BalanceTableProps = {
   rows: BalanceRow[];
   t: Dictionary;
+  locale: string;
 };
 
-export function BalanceTable({ rows, t }: BalanceTableProps) {
+export function BalanceTable({ rows, t, locale }: BalanceTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -50,7 +51,7 @@ export function BalanceTable({ rows, t }: BalanceTableProps) {
                   />
                 </TableCell>
                 <TableCell className="text-left">
-                  <Money cents={row.balance} />
+                  <Money cents={row.balance} locale={locale} />
                 </TableCell>
               </TableRow>
             ))}

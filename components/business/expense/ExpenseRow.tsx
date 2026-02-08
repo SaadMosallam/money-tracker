@@ -53,7 +53,7 @@ export function ExpenseRow({
         {title}
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        <Money cents={amount} />
+        <Money cents={amount} locale={locale} />
       </TableCell>
       <TableCell className="whitespace-nowrap">
         <UserLabel name={paidByName} />
