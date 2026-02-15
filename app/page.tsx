@@ -22,8 +22,13 @@ export default async function Home() {
   return (
     <PageContainer title={t.dashboard}>
       <div className="space-y-8">
-        <BalanceTable rows={balanceRows} t={t} />
-        <PairwiseDebts balances={balances} userById={userById} t={t} />
+        <BalanceTable rows={balanceRows} t={t} locale={defaultLocale} />
+        <PairwiseDebts
+          balances={balances}
+          userById={userById}
+          t={t}
+          locale={defaultLocale}
+        />
       </div>
     </PageContainer>
   );
