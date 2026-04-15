@@ -26,21 +26,12 @@ export const getUserByLogin = async (identifier: string) => {
   const [user] = await db
     .select()
     .from(users)
-    .where(
-      or(
-        ilike(users.email, trimmed),
-        ilike(users.name, trimmed)
-      )
-    )
+    .where(or(ilike(users.email, trimmed), ilike(users.name, trimmed)))
     .limit(1);
   return user ?? null;
 };
 
 export const getUserById = async (id: string) => {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, id))
-    .limit(1);
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return user ?? null;
 };

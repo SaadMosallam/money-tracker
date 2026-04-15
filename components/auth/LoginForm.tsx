@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
@@ -34,6 +34,7 @@ export function LoginForm({ locale, t }: LoginFormProps) {
   const authError = searchParams.get("error");
 
   useEffect(() => {
+    // if the callbackUrl is not set, set it to default home page
     if (!searchParams.get("callbackUrl")) {
       const params = new URLSearchParams(searchParams.toString());
       params.set("callbackUrl", `/${locale}`);
@@ -66,12 +67,9 @@ export function LoginForm({ locale, t }: LoginFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t.signInTitle}</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FieldSet>
+          <FieldSet >
             <FieldGroup>
               <Field>
                 <FieldLabel>{t.emailOrUsername}</FieldLabel>
