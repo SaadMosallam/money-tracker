@@ -39,20 +39,32 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { href: "/", label: "dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { href: "/expenses", label: "expenses", icon: <Receipt className="h-4 w-4" /> },
-  { href: "/payments", label: "payments", icon: <ArrowRightLeft className="h-4 w-4" /> },
+  {
+    href: "/",
+    label: "dashboard",
+    icon: <LayoutDashboard className="h-5 w-5 md:h-4 md:w-4" />,
+  },
+  {
+    href: "/expenses",
+    label: "expenses",
+    icon: <Receipt className="h-5 w-5 md:h-4 md:w-4" />,
+  },
+  {
+    href: "/payments",
+    label: "payments",
+    icon: <ArrowRightLeft className="h-5 w-5 md:h-4 md:w-4" />,
+  },
   {
     href: "/expenses/new",
     label: "newExpense",
     mobileLabel: "expenses",
-    icon: <PlusCircle className="h-4 w-4" />,
+    icon: <PlusCircle className="h-5 w-5 md:h-4 md:w-4" />,
   },
   {
     href: "/payments/new",
     label: "newPayment",
     mobileLabel: "payments",
-    icon: <BanknoteArrowUp className="h-4 w-4" />,
+    icon: <BanknoteArrowUp className="h-5 w-5 md:h-4 md:w-4" />,
   },
 ];
 
@@ -293,7 +305,7 @@ export function AppNav() {
 
       {!isLoginPage && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-          <div className="grid grid-cols-6">
+          <div className="grid h-16 grid-cols-6">
             {navItems.map((item) => {
               const active = isActive(pathname, withLocale(item.href));
               return (
@@ -301,7 +313,7 @@ export function AppNav() {
                   key={item.href}
                   href={withLocale(item.href)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
+                    "flex min-h-16 flex-col items-center justify-center gap-1.5 px-1 py-3 text-[11px] leading-tight text-center",
                     active ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
@@ -315,21 +327,21 @@ export function AppNav() {
             <Link
               href={withLocale("/account")}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] leading-tight text-center",
+                "flex min-h-16 flex-col items-center justify-center gap-1.5 px-1 py-3 text-[11px] leading-tight text-center",
                 pathname.startsWith(`/${locale}/account`)
                   ? "text-foreground"
                   : "text-muted-foreground"
               )}
             >
               <span className="relative">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-7 w-7">
                   {displayImage ? (
                     <AvatarImage src={displayImage} alt={displayName} />
                   ) : null}
                   <AvatarFallback>{displayInitials}</AvatarFallback>
                 </Avatar>
                 {approvalCount > 0 && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-destructive px-1 py-0.5 text-[8px] font-semibold text-white">
+                  <span className="absolute -right-1 -top-1 rounded-full bg-destructive px-1.5 py-0.5 text-[9px] font-semibold text-white">
                     {approvalCount}
                   </span>
                 )}
