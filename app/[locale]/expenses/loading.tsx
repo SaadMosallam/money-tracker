@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <PageContainer>
+    <PageContainer maxWidthClassName="max-w-6xl">
       <div className="space-y-6">
         <Skeleton className="h-8 w-40" />
 
@@ -45,4 +45,3 @@ export default function Loading() {
     </PageContainer>
   );
 }
-

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ExpenseList } from "@/components/business/expense/ExpenseList";
 import { PageContainer } from "@/components/business/layout/PageContainer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Dictionary } from "@/lib/i18n";
 import type { ExpenseFeedRow } from "@/lib/server/expensesFeed";
@@ -112,11 +113,26 @@ export function ExpensesFeedClient({
               </Button>
             </div>
             {isLoadingMore && (
-              <div className="space-y-3">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </div>
+              <>
+                <div className="space-y-3 md:hidden">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+                <div className="hidden w-full md:block">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <Skeleton className="h-6 w-56" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
             )}
           </div>
         )}
