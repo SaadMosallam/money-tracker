@@ -16,16 +16,24 @@ export const getUserIds = async () => {
   return usersRows.map((user) => user.id);
 };
 
-export const getExpenses = async () => {
-  return db.select().from(expenses).orderBy(desc(expenses.createdAt));
+export const getExpenses = async (limit?: number, offset = 0) => {
+  const query = db.select().from(expenses).orderBy(desc(expenses.createdAt));
+  if (typeof limit === "number") {
+    return query.limit(limit).offset(offset);
+  }
+  return query;
 };
 
 export const getExpenseParticipants = async () => {
     return db.select().from(expenseParticipants);
 };
 
-export const getPayments = async () => {
-  return db.select().from(payments).orderBy(desc(payments.createdAt));
+export const getPayments = async (limit?: number, offset = 0) => {
+  const query = db.select().from(payments).orderBy(desc(payments.createdAt));
+  if (typeof limit === "number") {
+    return query.limit(limit).offset(offset);
+  }
+  return query;
 };
 
 export const getBalanceDataset = async () => {
