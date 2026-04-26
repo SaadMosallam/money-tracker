@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPaymentApprovalsByPaymentIds } from "@/lib/db/queries/approvals";
-import { getPayments } from "@/lib/db/queries/balances";
+import { getPayments } from "@/lib/db/queries/payments";
 import { getUsers } from "@/lib/db/queries/users";
 import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 import { buildUserNameById } from "@/lib/utils/userNameById";
@@ -51,7 +51,7 @@ export const getPaymentFeedChunk = async ({
     const approvalList = approvalsByPayment.get(payment.id) ?? [];
     const approvalStatus = computeApprovalStatus(approvalList);
     const userApproval = approvalList.find(
-      (approval) => approval.userId === currentUserId
+      (approval) => approval.userId === currentUserId,
     );
 
     return {

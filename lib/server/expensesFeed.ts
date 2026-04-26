@@ -1,7 +1,10 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getExpenseApprovalsByExpenseIds, getExpenseParticipantsByExpenseIds } from "@/lib/db/queries/approvals";
-import { getExpenses } from "@/lib/db/queries/balances";
+import {
+  getExpenseApprovalsByExpenseIds,
+  getExpenseParticipantsByExpenseIds,
+} from "@/lib/db/queries/approvals";
+import { getExpenses } from "@/lib/db/queries/expenses";
 import { getUsers } from "@/lib/db/queries/users";
 import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 import { buildUserNameById } from "@/lib/utils/userNameById";
@@ -49,7 +52,9 @@ export const getExpenseFeedChunk = async ({
 
   const currentUserId = session?.user?.id ?? "";
   const userNameById = buildUserNameById(users);
-  const userAvatarById = new Map(users.map((user) => [user.id, user.avatarUrl ?? null]));
+  const userAvatarById = new Map(
+    users.map((user) => [user.id, user.avatarUrl ?? null]),
+  );
 
   const approvalsByExpense = new Map<string, typeof approvals>();
   for (const approval of approvals) {
@@ -94,7 +99,7 @@ export const getExpenseFeedChunk = async ({
     const approvalList = approvalsByExpense.get(expense.id) ?? [];
     const approvalStatus = computeApprovalStatus(approvalList);
     const userApproval = approvalList.find(
-      (approval) => approval.userId === currentUserId
+      (approval) => approval.userId === currentUserId,
     );
 
     return {

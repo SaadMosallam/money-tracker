@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { calculateBalances } from "@/lib/calculations/calculateBalances";
 import { db } from "@/lib/db/index";
 import {
@@ -9,101 +9,72 @@ import {
   expenseApprovals,
   paymentApprovals,
 } from "@/lib/db/schema";
-import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
+import type { CalculateBalancesInput } from "@/lib/types/expensesTypes";
 
 export const getUserIds = async () => {
   const usersRows = await db.select().from(users);
   return usersRows.map((user) => user.id);
 };
 
-export const getExpenses = async (limit?: number, offset = 0) => {
-  const query = db.select().from(expenses).orderBy(desc(expenses.createdAt));
+export const getApprovedExpenses = async (limit?: number, offset = 0) => {
+  const query = db
+    .select({ expense: expenses })
+    .from(expenses)
+    .innerJoin(expenseApprovals, eq(expenses.id, expenseApprovals.expenseId))
+    .groupBy(expenses.id)
+    .having(sql`bool_and(${expenseApprovals.status} = 'approved')`)
+    .orderBy(desc(expenses.createdAt));
   if (typeof limit === "number") {
     return query.limit(limit).offset(offset);
   }
   return query;
 };
 
-export const getExpenseParticipants = async () => {
-    return db.select().from(expenseParticipants);
+export const getApprovedExpenseParticipants = async () => {
+  return db
+    .select({ participant: expenseParticipants })
+    .from(expenseParticipants).where(sql`
+      ${expenseParticipants.expenseId} IN (
+        SELECT ${expenseApprovals.expenseId}
+        FROM ${expenseApprovals}
+        GROUP BY ${expenseApprovals.expenseId}
+        HAVING bool_and(${expenseApprovals.status} = 'approved')
+      )
+    `);
 };
 
-export const getPayments = async (limit?: number, offset = 0) => {
-  const query = db.select().from(payments).orderBy(desc(payments.createdAt));
-  if (typeof limit === "number") {
-    return query.limit(limit).offset(offset);
-  }
+export const getApprovedPayments = async () => {
+  const query = db
+    .select({
+      payment: payments,
+    })
+    .from(payments)
+    .innerJoin(paymentApprovals, eq(payments.id, paymentApprovals.paymentId))
+    .groupBy(payments.id)
+    .having(sql`bool_and(${paymentApprovals.status} = 'approved')`)
+    .orderBy(desc(payments.createdAt));
+
   return query;
 };
 
-export const getBalanceDataset = async () => {
-    const [
-      userIds,
-      expenses,
-      participants,
-      payments,
-      expenseApprovalsRows,
-      paymentApprovalsRows,
-    ] = await Promise.all([
+export const getBalanceDataset = async (): Promise<CalculateBalancesInput> => {
+  const [userIds, approvedExpenses, approvedParticipants, approvedPayments] =
+    await Promise.all([
       getUserIds(),
-      getExpenses(),
-      getExpenseParticipants(),
-      getPayments(),
-      db.select().from(expenseApprovals),
-      db.select().from(paymentApprovals),
+      getApprovedExpenses(),
+      getApprovedExpenseParticipants(),
+      getApprovedPayments(),
     ]);
-  
-    const approvalsByExpense = new Map<string, typeof expenseApprovalsRows>();
-    for (const approval of expenseApprovalsRows) {
-      const list = approvalsByExpense.get(approval.expenseId) ?? [];
-      list.push(approval);
-      approvalsByExpense.set(approval.expenseId, list);
-    }
 
-    const approvalsByPayment = new Map<string, typeof paymentApprovalsRows>();
-    for (const approval of paymentApprovalsRows) {
-      const list = approvalsByPayment.get(approval.paymentId) ?? [];
-      list.push(approval);
-      approvalsByPayment.set(approval.paymentId, list);
-    }
-
-    const approvedExpenseIds = new Set(
-      expenses
-        .filter((expense) => {
-          const approvals = approvalsByExpense.get(expense.id) ?? [];
-          return computeApprovalStatus(approvals) === "approved";
-        })
-        .map((expense) => expense.id)
-    );
-
-    const approvedPaymentIds = new Set(
-      payments
-        .filter((payment) => {
-          const approvals = approvalsByPayment.get(payment.id) ?? [];
-          return computeApprovalStatus(approvals) === "approved";
-        })
-        .map((payment) => payment.id)
-    );
-
-    const approvedExpenses = expenses.filter((expense) =>
-      approvedExpenseIds.has(expense.id)
-    );
-    const approvedParticipants = participants.filter((participant) =>
-      approvedExpenseIds.has(participant.expenseId)
-    );
-    const approvedPayments = payments.filter((payment) =>
-      approvedPaymentIds.has(payment.id)
-    );
-
-    return {
-      userIds,
-      expenses: approvedExpenses,
-      participants: approvedParticipants,
-      payments: approvedPayments,
-    };
+  return {
+    userIds,
+    expenses: approvedExpenses.map(({ expense }) => expense),
+    participants: approvedParticipants.map(({ participant }) => participant),
+    payments: approvedPayments.map(({ payment }) => payment),
+  };
 };
 
 export const getBalances = async () => {
-    const dataset = await getBalanceDataset();
-    return calculateBalances(dataset);
+  const dataset = await getBalanceDataset();
+  return calculateBalances(dataset);
 };
