@@ -51,7 +51,7 @@ export const expenseParticipants = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.expenseId, table.userId] }),
-  })
+  }),
 );
 
 /* ================= PAYMENTS ================= */
@@ -87,7 +87,7 @@ export const passwordResetTokens = pgTable(
   },
   (table) => ({
     userTokenIdx: index("password_reset_user_idx").on(table.userId),
-  })
+  }),
 );
 
 /* ================= APPROVALS ================= */
@@ -106,8 +106,10 @@ export const expenseApprovals = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.expenseId, table.userId] }),
-  })
+  }),
 );
+
+/* ================= PAYMENT APPROVALS ================= */
 
 export const paymentApprovals = pgTable(
   "payment_approvals",
@@ -123,8 +125,10 @@ export const paymentApprovals = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.paymentId, table.userId] }),
-  })
+  }),
 );
+
+/* ================= APPROVAL NOTIFICATIONS ================= */
 
 export const approvalNotifications = pgTable(
   "approval_notifications",
@@ -142,7 +146,7 @@ export const approvalNotifications = pgTable(
     unique: uniqueIndex("approval_notifications_unique").on(
       table.userId,
       table.entityType,
-      table.entityId
+      table.entityId,
     ),
-  })
+  }),
 );
