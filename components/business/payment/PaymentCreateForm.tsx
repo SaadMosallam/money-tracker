@@ -63,11 +63,11 @@ export function PaymentCreateForm({
 
   const fromUserLabel = useMemo(() => {
     return currentUserName || t.unknownUser;
-  }, [currentUserName]);
+  }, [currentUserName, t.unknownUser]);
 
   const toUserLabel = useMemo(() => {
     return users.find((user) => user.id === toUserId)?.name ?? t.selectUser;
-  }, [users, toUserId]);
+  }, [users, toUserId, t.selectUser]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
