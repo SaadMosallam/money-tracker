@@ -5,10 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import {
-  History,
-  LayoutDashboard,
-  PlusCircle,
-  Candy,
   User,
   CheckCircle2,
   Sun,
@@ -17,6 +13,13 @@ import {
   LogOut,
   Languages,
 } from "lucide-react";
+import {
+  SquaresFour as PhSquaresFour,
+  ClockCounterClockwise as PhClockCounterClockwise,
+  PlusCircle as PhPlusCircle,
+  Cookie as PhCookie,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils/cn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUserInitials } from "@/lib/utils/userInitials";
@@ -34,30 +37,14 @@ type NavItem = {
   href: string;
   label: keyof typeof dictionary["en"];
   mobileLabel?: keyof typeof dictionary["en"];
-  icon: React.ReactNode;
+  Icon: PhosphorIcon;
 };
 
 const navItems: NavItem[] = [
-  {
-    href: "/",
-    label: "dashboard",
-    icon: <LayoutDashboard className="h-5 w-5 md:h-4 md:w-4" />,
-  },
-  {
-    href: "/history",
-    label: "history",
-    icon: <History className="h-5 w-5 md:h-4 md:w-4" />,
-  },
-  {
-    href: "/new",
-    label: "new",
-    icon: <PlusCircle className="h-5 w-5 md:h-4 md:w-4" />,
-  },
-  {
-    href: "/chocolate",
-    label: "chocolate",
-    icon: <Candy className="h-5 w-5 md:h-4 md:w-4" />,
-  },
+  { href: "/",          label: "dashboard", Icon: PhSquaresFour },
+  { href: "/history",   label: "history",   Icon: PhClockCounterClockwise },
+  { href: "/new",       label: "new",       Icon: PhPlusCircle },
+  { href: "/chocolate", label: "chocolate", Icon: PhCookie },
 ];
 
 const isActive = (pathname: string, href: string) => {
@@ -199,7 +186,7 @@ export function AppNav() {
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                       )}
                     >
-                      {item.icon}
+                      <item.Icon size={16} weight={active ? "fill" : "regular"} />
                       <span className="flex items-center gap-2">
                         {t[item.label]}
                       </span>
@@ -309,7 +296,7 @@ export function AppNav() {
                     active ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
-                  {item.icon}
+                  <item.Icon size={22} weight={active ? "fill" : "regular"} />
                   <span className="whitespace-normal">
                     {t[item.mobileLabel ?? item.label]}
                   </span>

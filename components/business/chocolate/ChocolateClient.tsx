@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Candy, ShoppingCart, Utensils, BarChart3, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import {
+  Cookie as PhCookie,
+  ShoppingCart as PhShoppingCart,
+  ForkKnife as PhForkKnife,
+  ChartBar as PhChartBar,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/badge";
@@ -73,11 +80,11 @@ export function ChocolateClient({
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("bars");
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "bars", label: t.chocolateBars, icon: <Candy className="h-4 w-4" /> },
-    { id: "buy", label: t.buyBar, icon: <ShoppingCart className="h-4 w-4" /> },
-    { id: "eat", label: t.eatPiece, icon: <Utensils className="h-4 w-4" /> },
-    { id: "balances", label: t.chocolateBalances, icon: <BarChart3 className="h-4 w-4" /> },
+  const tabs: { id: Tab; label: string; Icon: PhosphorIcon }[] = [
+    { id: "bars", label: t.chocolateBars, Icon: PhCookie },
+    { id: "buy", label: t.buyBar, Icon: PhShoppingCart },
+    { id: "eat", label: t.eatPiece, Icon: PhForkKnife },
+    { id: "balances", label: t.chocolateBalances, Icon: PhChartBar },
   ];
 
   const userById = Object.fromEntries(users.map((u) => [u.id, u]));
@@ -92,23 +99,29 @@ export function ChocolateClient({
 
   return (
     <PageContainer title={t.chocolate}>
-      <div className="mb-6 inline-flex flex-wrap rounded-lg border bg-muted p-1 gap-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer",
-              activeTab === tab.id
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+      <div className="mb-6 inline-flex flex-wrap rounded-xl border bg-muted p-1.5 gap-1.5">
+        {tabs.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer",
+                active
+                  ? "bg-background text-foreground shadow-md ring-1 ring-border"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50",
+              )}
+            >
+              <tab.Icon
+                size={18}
+                weight={active ? "fill" : "regular"}
+              />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === "bars" && (
