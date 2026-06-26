@@ -1,4 +1,7 @@
-import type { ExpenseParticipantRow } from "@/lib/types/expensesTypes";
+type WeightedParticipant = {
+  userId: string;
+  weight: number;
+};
 
 /**
  * Splits an integer amount (cents) across participants by weight.
@@ -9,7 +12,7 @@ import type { ExpenseParticipantRow } from "@/lib/types/expensesTypes";
  */
 export function splitAmountByWeights(
   totalAmount: number,
-  participants: ExpenseParticipantRow[]
+  participants: WeightedParticipant[]
 ): Record<string, number> {
   if (!Number.isInteger(totalAmount) || totalAmount <= 0) {
     throw new Error("totalAmount must be a positive integer (cents)");

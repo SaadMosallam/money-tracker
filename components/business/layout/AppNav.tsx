@@ -8,6 +8,7 @@ import {
   History,
   LayoutDashboard,
   PlusCircle,
+  Candy,
   User,
   CheckCircle2,
   Sun,
@@ -51,6 +52,11 @@ const navItems: NavItem[] = [
     href: "/new",
     label: "new",
     icon: <PlusCircle className="h-5 w-5 md:h-4 md:w-4" />,
+  },
+  {
+    href: "/chocolate",
+    label: "chocolate",
+    icon: <Candy className="h-5 w-5 md:h-4 md:w-4" />,
   },
 ];
 
@@ -291,7 +297,7 @@ export function AppNav() {
 
       {!isLoginPage && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-          <div className="grid h-16 grid-cols-4">
+          <div className="grid h-16 grid-cols-5">
             {navItems.map((item) => {
               const active = isActive(pathname, withLocale(item.href));
               return (

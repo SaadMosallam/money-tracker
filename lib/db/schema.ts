@@ -128,6 +128,103 @@ export const paymentApprovals = pgTable(
   }),
 );
 
+/* ================= CHOCOLATE BARS ================= */
+
+// Dimensions are stored as integer hundredths (decimal input × 100).
+// area = width * height, an integer in units of 1/10000 — no floats, mirroring cents.
+export const chocolateBars = pgTable("chocolate_bars", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  cost: integer("cost").notNull(), // cents
+  buyerId: uuid("buyer_id")
+    .notNull()
+    .references(() => users.id),
+  width: integer("width").notNull(), // hundredths
+  height: integer("height").notNull(), // hundredths
+  area: integer("area").notNull(), // width * height, units of 1/10000
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  settledAt: timestamp("settled_at"), // set when the last participant marks settled
+});
+
+/* ================= CHOCOLATE BAR PARTICIPANTS ================= */
+
+export const chocolateBarParticipants = pgTable(
+  "chocolate_bar_participants",
+  {
+    barId: uuid("bar_id")
+      .notNull()
+      .references(() => chocolateBars.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.barId, table.userId] }),
+  }),
+);
+
+/* ================= CHOCOLATE BAR APPROVALS ================= */
+
+export const chocolateBarApprovals = pgTable(
+  "chocolate_bar_approvals",
+  {
+    barId: uuid("bar_id")
+      .notNull()
+      .references(() => chocolateBars.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    status: varchar("status", { length: 16 }).default("pending").notNull(),
+    decidedAt: timestamp("decided_at"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.barId, table.userId] }),
+  }),
+);
+
+/* ================= CHOCOLATE PIECES ================= */
+
+// Append-only log of pieces eaten. area = width * height (units of 1/10000).
+export const chocolatePieces = pgTable(
+  "chocolate_pieces",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    barId: uuid("bar_id")
+      .notNull()
+      .references(() => chocolateBars.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    width: integer("width").notNull(), // hundredths
+    height: integer("height").notNull(), // hundredths
+    area: integer("area").notNull(), // width * height, units of 1/10000
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    barIdx: index("chocolate_pieces_bar_idx").on(table.barId),
+  }),
+);
+
+/* ================= CHOCOLATE BAR SETTLEMENTS ================= */
+
+// One row per participant who has marked the bar settled.
+// Reset (delete all rows for a bar) whenever a new piece is logged.
+export const chocolateBarSettlements = pgTable(
+  "chocolate_bar_settlements",
+  {
+    barId: uuid("bar_id")
+      .notNull()
+      .references(() => chocolateBars.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    settledAt: timestamp("settled_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.barId, table.userId] }),
+  }),
+);
+
 /* ================= APPROVAL NOTIFICATIONS ================= */
 
 export const approvalNotifications = pgTable(

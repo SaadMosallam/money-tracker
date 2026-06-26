@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
-    "test:calc": "tsx scripts/tests/calculateBalances.ts"
+    "test:calc": "tsx scripts/tests/calculateBalances.ts",
+    "test:choc": "tsx scripts/tests/calculateChocolateBalances.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

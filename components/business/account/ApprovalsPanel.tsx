@@ -19,6 +19,7 @@ import {
   getPaymentApprovalsByPaymentIds,
   getPaymentsByIds,
 } from "@/lib/db/queries/approvals";
+import { getPendingChocolateApprovalsForUser } from "@/lib/db/queries/chocolate";
 import { buildUserNameById } from "@/lib/utils/userNameById";
 import { computeApprovalStatus } from "@/lib/utils/approvalStatus";
 import { Money } from "@/components/business/primitives/Money";
@@ -29,6 +30,10 @@ import {
   approvePayment,
   rejectPayment,
 } from "@/lib/actions/approvals";
+import {
+  approveChocolateBar,
+  rejectChocolateBar,
+} from "@/lib/actions/chocolate";
 import { Dictionary } from "@/lib/i18n";
 
 type ApprovalsPanelProps = {
@@ -42,9 +47,10 @@ export default async function ApprovalsPanel({
   locale,
   t,
 }: ApprovalsPanelProps) {
-  const [notifications, users] = await Promise.all([
+  const [notifications, users, chocolatePending] = await Promise.all([
     getApprovalNotificationsByUser(userId),
     getUsers(),
+    getPendingChocolateApprovalsForUser(userId),
   ]);
 
   const expenseIds = Array.from(
@@ -152,6 +158,69 @@ export default async function ApprovalsPanel({
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.pendingChocolateBars}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {chocolatePending.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              {t.noPendingChocolateApprovals}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t.title}</TableHead>
+                  <TableHead>{t.amount} ({t.egp})</TableHead>
+                  <TableHead>{t.paidBy}</TableHead>
+                  <TableHead>{t.participants}</TableHead>
+                  <TableHead>{t.created}</TableHead>
+                  <TableHead className="text-left">{t.action}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {chocolatePending.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="whitespace-nowrap font-medium">
+                      <Link href={`/${locale}/chocolate`}>{row.title}</Link>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <Money cents={row.cost} locale={locale} />
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {userNameById[row.buyerId] ?? row.buyerId}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                      {row.participantIds.map((id) => userNameById[id] ?? id).join(", ")}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                      {formatDateTime(row.createdAt, locale)}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-left">
+                      <div className="flex justify-end gap-2">
+                        <form action={approveChocolateBar}>
+                          <input type="hidden" name="barId" value={row.id} />
+                          <Button type="submit" size="sm" className="cursor-pointer">
+                            {t.approve}
+                          </Button>
+                        </form>
+                        <form action={rejectChocolateBar}>
+                          <input type="hidden" name="barId" value={row.id} />
+                          <Button type="submit" variant="outline" size="sm" className="cursor-pointer">
+                            {t.reject}
+                          </Button>
+                        </form>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>{t.pendingExpenses}</CardTitle>
