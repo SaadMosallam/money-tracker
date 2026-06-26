@@ -5,10 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import {
-  ArrowRightLeft,
+  History,
   LayoutDashboard,
   PlusCircle,
-  Receipt,
   BanknoteArrowUp,
   User,
   CheckCircle2,
@@ -45,25 +44,18 @@ const navItems: NavItem[] = [
     icon: <LayoutDashboard className="h-5 w-5 md:h-4 md:w-4" />,
   },
   {
-    href: "/expenses",
-    label: "expenses",
-    icon: <Receipt className="h-5 w-5 md:h-4 md:w-4" />,
-  },
-  {
-    href: "/payments",
-    label: "payments",
-    icon: <ArrowRightLeft className="h-5 w-5 md:h-4 md:w-4" />,
+    href: "/history",
+    label: "history",
+    icon: <History className="h-5 w-5 md:h-4 md:w-4" />,
   },
   {
     href: "/expenses/new",
     label: "newExpense",
-    mobileLabel: "expenses",
     icon: <PlusCircle className="h-5 w-5 md:h-4 md:w-4" />,
   },
   {
     href: "/payments/new",
     label: "newPayment",
-    mobileLabel: "payments",
     icon: <BanknoteArrowUp className="h-5 w-5 md:h-4 md:w-4" />,
   },
 ];
@@ -305,7 +297,7 @@ export function AppNav() {
 
       {!isLoginPage && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-          <div className="grid h-16 grid-cols-6">
+          <div className="grid h-16 grid-cols-5">
             {navItems.map((item) => {
               const active = isActive(pathname, withLocale(item.href));
               return (
