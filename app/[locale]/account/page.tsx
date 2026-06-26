@@ -14,7 +14,6 @@ import {
 } from "@/lib/actions/updateUserAvatar";
 import ApprovalsPanel from "@/components/business/account/ApprovalsPanel";
 import { ApprovalsClientWrapper } from "@/components/business/account/ApprovalsClientWrapper";
-import Link from "next/link";
 import { db } from "@/lib/db";
 import { approvalNotifications } from "@/lib/db/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";

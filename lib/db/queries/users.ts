@@ -1,15 +1,16 @@
 import { eq, ilike, or } from "drizzle-orm";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 
-export const getUsers = async () => {
+export const getUsers = cache(async () => {
   const usersRows = await db.select().from(users);
   return usersRows.map((user) => ({
     id: user.id,
     name: user.name,
     avatarUrl: user.avatarUrl ?? null,
   }));
-};
+});
 
 export const getUserByEmail = async (email: string) => {
   const [user] = await db
