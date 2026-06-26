@@ -116,7 +116,7 @@ export function HistoryClient({
             type="button"
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              "flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer",
               activeTab === tab.id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
