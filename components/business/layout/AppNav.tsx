@@ -8,7 +8,6 @@ import {
   History,
   LayoutDashboard,
   PlusCircle,
-  BanknoteArrowUp,
   User,
   CheckCircle2,
   Sun,
@@ -49,14 +48,9 @@ const navItems: NavItem[] = [
     icon: <History className="h-5 w-5 md:h-4 md:w-4" />,
   },
   {
-    href: "/expenses/new",
-    label: "newExpense",
+    href: "/new",
+    label: "new",
     icon: <PlusCircle className="h-5 w-5 md:h-4 md:w-4" />,
-  },
-  {
-    href: "/payments/new",
-    label: "newPayment",
-    icon: <BanknoteArrowUp className="h-5 w-5 md:h-4 md:w-4" />,
   },
 ];
 
@@ -297,7 +291,7 @@ export function AppNav() {
 
       {!isLoginPage && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
-          <div className="grid h-16 grid-cols-5">
+          <div className="grid h-16 grid-cols-4">
             {navItems.map((item) => {
               const active = isActive(pathname, withLocale(item.href));
               return (
