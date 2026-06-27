@@ -279,8 +279,7 @@ export async function unsettleChocolateBar(formData: FormData) {
   const barId = String(formData.get("barId") ?? "");
   if (!barId) throw new Error("barId is required.");
 
-  const [barRows] = await db.select().from(chocolateBars).where(eq(chocolateBars.id, barId)).limit(1);
-  const bar = barRows;
+  const [bar] = await db.select().from(chocolateBars).where(eq(chocolateBars.id, barId)).limit(1);
   if (!bar) throw new Error("Bar not found.");
   if (bar.settledAt !== null) throw new Error("Bar is fully settled and cannot be changed.");
 

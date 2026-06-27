@@ -402,9 +402,9 @@ function BuyTab({
         }
 
         const fd = new FormData(form);
-        fd.set("cost", String(parseCurrencyToCents(cost)));
-        fd.set("width", String(parseCurrencyToCents(width)));
-        fd.set("height", String(parseCurrencyToCents(height)));
+        fd.set("cost", cost);
+        fd.set("width", width);
+        fd.set("height", height);
         fd.set("participantIds", JSON.stringify(Array.from(participantIds)));
         fd.set("locale", locale);
         await createChocolateBar(fd);
@@ -594,8 +594,8 @@ function EatTab({
 
         const fd = new FormData();
         fd.set("barId", selectedBarId);
-        fd.set("width", String(w));
-        fd.set("height", String(h));
+        fd.set("width", width);
+        fd.set("height", height);
         await logChocolatePiece(fd);
         toast.success(t.logPiece);
         setWidth("");
