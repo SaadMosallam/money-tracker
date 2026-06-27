@@ -285,14 +285,14 @@ function BarCard({
       <CardContent className="space-y-3 text-sm">
         <div className="flex flex-wrap gap-4">
           <span className="text-muted-foreground">
-            {formatDim(bar.width)} × {formatDim(bar.height)} = {formatArea(bar.area)} u²
+            {formatDim(bar.width)} cm × {formatDim(bar.height)} cm = {formatArea(bar.area)} cm²
           </span>
           <span className="text-muted-foreground">
-            {t.totalEaten}: {formatArea(bar.totalEaten)} u²
+            {t.totalEaten}: {formatArea(bar.totalEaten)} cm²
           </span>
           {bar.status !== "settled" && (
             <span className="text-muted-foreground">
-              {t.remainingArea}: {formatArea(remaining)} u²
+              {t.remainingArea}: {formatArea(remaining)} cm²
             </span>
           )}
         </div>
@@ -302,7 +302,7 @@ function BarCard({
           <div className="text-xs text-muted-foreground space-y-0.5">
             {Object.entries(bar.eatenByUser).map(([uid, area]) => (
               <div key={uid}>
-                {userName(uid)}: {formatArea(area)} u²
+                {userName(uid)}: {formatArea(area)} cm²
                 {uid === currentUserId && ` (${t.eatenByYou})`}
               </div>
             ))}
@@ -638,7 +638,7 @@ function EatTab({
                   <option value="">{t.selectBar}</option>
                   {eligibleBars.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.title} — {t.remainingArea}: {formatArea(Math.max(0, b.area - b.totalEaten))} u²
+                      {b.title} — {t.remainingArea}: {formatArea(Math.max(0, b.area - b.totalEaten))} cm²
                     </option>
                   ))}
                 </select>
@@ -648,7 +648,7 @@ function EatTab({
 
             {remaining !== null && (
               <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-                {t.remainingArea}: {formatArea(remaining)} u²
+                {t.remainingArea}: {formatArea(remaining)} cm²
               </div>
             )}
 
